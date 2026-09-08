@@ -1,0 +1,254 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ivory-50 text-ink-800 font-sans antialiased;
+    overflow-x: hidden;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-ink-900;
+  }
+  ::selection {
+    background: #FF5A1F;
+    color: #FBF4E8;
+  }
+  :focus-visible {
+    outline: 2px dashed #FF5A1F;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Film grain overlay over the whole page */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-ink-900 text-ivory-50 px-7 py-3 rounded-full border border-ink-900 text-sm font-semibold hover:bg-champagne-500 hover:border-champagne-500 hover:text-ink-900 hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.98] shadow-[0_10px_24px_-12px_rgba(30,23,16,.5)];
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 bg-transparent text-ink-900 px-7 py-3 rounded-full border-[1.5px] border-ink-900 text-sm font-semibold hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.98];
+  }
+  .btn-outline {
+    @apply inline-flex items-center gap-2 bg-champagne-500 text-ink-900 px-7 py-3 rounded-full border-[1.5px] border-champagne-500 text-sm font-semibold hover:bg-mink-400 hover:border-mink-400 hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.98] shadow-[0_10px_24px_-12px_rgba(232,67,13,.55)];
+  }
+  .card {
+    @apply bg-ivory-200 rounded-[28px] border border-stone-200 overflow-hidden transition-all duration-300;
+  }
+  .card-hover {
+    @apply hover:-translate-y-2 hover:shadow-card;
+  }
+  .input-field {
+    @apply w-full px-5 py-3 rounded-full border border-stone-300 bg-white text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-champagne-500 transition-colors duration-200;
+  }
+  textarea.input-field {
+    border-radius: 0.75rem;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto;
+  }
+  /* Mono micro-label with the sun dash */
+  .eyebrow {
+    @apply font-mono text-[0.72rem] uppercase tracking-[0.22em] text-ink-600 flex items-center gap-[0.9em];
+  }
+  .eyebrow::before {
+    content: "";
+    width: 34px;
+    height: 1px;
+    background: #FF5A1F;
+    flex: none;
+  }
+  .eyebrow-light {
+    @apply font-mono text-[0.72rem] uppercase tracking-[0.22em] text-ivory-100/75 flex items-center gap-[0.9em];
+  }
+  .eyebrow-light::before {
+    content: "";
+    width: 34px;
+    height: 1px;
+    background: #FFB25E;
+    flex: none;
+  }
+  .text-gradient {
+    @apply text-champagne-600;
+  }
+  /* Gradient-italic emphasis used inside display headings */
+  .em-sun {
+    font-style: italic;
+    background: linear-gradient(105deg, #FF5A1F 10%, #FFB25E 60%, #FF5A1F 95%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .em-sun-deep {
+    font-style: italic;
+    color: #E8430D;
+  }
+  .em-amber {
+    font-style: italic;
+    color: #FFB25E;
+  }
+  .brand-title {
+    @apply font-serif font-black tracking-[0.02em] text-ink-900 whitespace-nowrap;
+  }
+  .brand-title-light {
+    @apply font-serif font-black tracking-[0.02em] text-ivory-50 whitespace-nowrap;
+  }
+  .logo-skeleton {
+    background: linear-gradient(110deg, #F4E9D5 0%, #FBF4E8 25%, #FFE3C0 50%, #FBF4E8 75%, #F4E9D5 100%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.8s ease-in-out infinite;
+  }
+  /* Arch shapes */
+  .arch-mask {
+    border-radius: 999px 999px 28px 28px;
+  }
+  .arch-invert {
+    border-radius: 28px 999px 999px 28px;
+  }
+  /* Giant outlined footer wordmark */
+  .footer-wordmark {
+    font-family: Fraunces, Georgia, serif;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    line-height: 0.8;
+    font-size: clamp(4rem, 15vw, 13rem);
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(251, 244, 232, 0.4);
+    text-align: center;
+    user-select: none;
+    transition: color 0.6s ease, -webkit-text-stroke-color 0.6s ease;
+  }
+  .footer-wordmark:hover {
+    color: #FF5A1F;
+    -webkit-text-stroke-color: transparent;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============ Fabric signature decorations ============ */
+
+/* Subtle self-hosted fabric video behind the hero */
+.hero-fabric-video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hero-fabric-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.18;
+}
+
+/* Running-stitch thread — hero */
+.fabric-flow {
+  position: absolute;
+  top: -14vmin;
+  right: -18vmin;
+  width: 100vmin;
+  height: 100vmin;
+  z-index: 0;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.fabric-flow .thread {
+  transform-box: fill-box;
+  stroke-dasharray: 11 9;
+  animation: threadSew 10s linear infinite;
+}
+@keyframes threadSew {
+  to { stroke-dashoffset: -200px; }
+}
+
+/* Drifting fabric folds — dark sections */
+.fabric-folds {
+  position: absolute;
+  left: 50%;
+  bottom: -42vmin;
+  transform: translateX(-50%);
+  width: 140vmin;
+  height: 90vmin;
+  pointer-events: none;
+  opacity: 0.55;
+}
+.fabric-folds .fold-1 {
+  animation: foldSwayA 11s ease-in-out infinite alternate;
+}
+.fabric-folds .fold-2 {
+  animation: foldSwayB 14s ease-in-out infinite alternate;
+}
+@keyframes foldSwayA {
+  from { transform: translateX(-24px) skewX(0deg); }
+  to { transform: translateX(24px) skewX(4deg); }
+}
+@keyframes foldSwayB {
+  from { transform: translateX(20px) skewX(2deg); }
+  to { transform: translateX(-20px) skewX(-2deg); }
+}
+
+/* Marquee band — pause on hover */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-fabric-video { display: none; }
+  .fabric-flow .thread,
+  .fabric-folds .fold-1,
+  .fabric-folds .fold-2,
+  .marquee-track { animation: none; }
+}

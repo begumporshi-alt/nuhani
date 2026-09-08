@@ -1,0 +1,207 @@
+import { Link, useNavigate } from 'react-router-dom'
+import { Heart, Star } from 'lucide-react'
+import { supabase, type Product } from '../lib/supabase'
+import { formatBDT } from '../lib/constants'
+import { useCart } from '../contexts/CartContext'
+import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
+import { useState, useEffect } from 'react'
+
+export default function ProductCard({ product }: { product: Product }) {
+  const { addToCart } = useCart()
+  const { session } = useAuth()
+  const { showToast } = useToast()
+  const navigate = useNavigate()
+  const [adding, setAdding] = useState(false)
+  const [inWishlist, setInWishlist] = useState(false)
+  const [rating, setRating] = useState<{ avg: number; count: number } | null>(null)
+
+  useEffect(() => {
+    supabase
+      .from('reviews')
+      .select('rating')
+      .eq('product_id', product.id)
+      .eq('is_approved', true)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          const avg = data.reduce((s, r) => s + r.rating, 0) / data.length
+          setRating({ avg, count: data.length })
+        }
+      })
+  }, [product.id])
+
+  useEffect(() => {
+    if (!session?.user) {
+      setInWishlist(false)
+      return
+    }
+    supabase
+      .from('wishlists')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .eq('product_id', product.id)
+      .maybeSingle()
+      .then(({ data }) => setInWishlist(!!data))
+  }, [session?.user?.id, product.id])
+
+  const minPrice = product.variants?.length
+    ? Math.min(...product.variants.map((v) => v.price))
+    : 0
+  const minCompare = product.variants?.length
+    ? Math.min(...product.variants.filter((v) => v.compare_at_price).map((v) => v.compare_at_price!)) || 0
+    : 0
+  const totalStock = product.variants?.reduce((sum, v) => sum + v.stock_quantity, 0) ?? 0
+  const isLowStock = totalStock > 0 && totalStock <= 5
+  const isOutOfStock = totalStock === 0
+  const hasDiscount = minCompare > minPrice
+
+  const handleQuickAdd = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (!product.variants?.length || isOutOfStock) return
+    setAdding(true)
+    const firstVariant = product.variants[0]
+    await addToCart(firstVariant.id, 1)
+    showToast('Added to cart!', 'success')
+    setAdding(false)
+  }
+
+  const handleBuyNow = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (!product.variants?.length || isOutOfStock) return
+    const firstVariant = product.variants[0]
+    await addToCart(firstVariant.id, 1)
+    navigate('/cart')
+  }
+
+  const handleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (!session?.user) {
+      showToast('Please log in to save items to your wishlist.', 'info')
+      navigate('/login')
+      return
+    }
+    try {
+      if (inWishlist) {
+        const { error } = await supabase
+          .from('wishlists')
+          .delete()
+          .eq('user_id', session.user.id)
+          .eq('product_id', product.id)
+        if (error) throw error
+        setInWishlist(false)
+        showToast('Removed from wishlist.', 'info')
+      } else {
+        const { error } = await supabase
+          .from('wishlists')
+          .insert({ user_id: session.user.id, product_id: product.id })
+        if (error) throw error
+        setInWishlist(true)
+        showToast('Added to wishlist!', 'success')
+      }
+    } catch {
+      showToast('Could not update your wishlist. Please try again.', 'error')
+    }
+  }
+
+  const image = product.images?.[0] ?? 'https://images.pexels.com/photos/307009/pexels-photo-307009.jpeg'
+
+  return (
+    <Link to={`/product/${product.slug}`} className="group block">
+      <div className="bg-ivory-200 rounded-[28px] border border-stone-200 overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-card flex flex-col">
+        <div className="relative aspect-[4/4.6] overflow-hidden bg-ivory-100">
+          <img
+            src={image}
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.07]"
+            loading="lazy"
+          />
+
+          {/* Chips */}
+          <div className="absolute top-3.5 left-3.5 flex flex-col items-start gap-1.5">
+            {hasDiscount && (
+              <span className="font-mono text-[9px] tracking-[0.16em] uppercase font-bold bg-champagne-500 text-ink-900 rounded-full px-2.5 py-1">
+                Sale
+              </span>
+            )}
+            {product.is_featured && (
+              <span className="font-mono text-[9px] tracking-[0.16em] uppercase bg-ivory-50 border border-stone-300 text-ink-600 rounded-full px-2.5 py-1">
+                Featured
+              </span>
+            )}
+            {isLowStock && !isOutOfStock && (
+              <span className="font-mono text-[9px] tracking-[0.16em] uppercase bg-ivory-50 border border-stone-300 text-ink-600 rounded-full px-2.5 py-1">
+                Low stock
+              </span>
+            )}
+          </div>
+
+          {/* Wishlist */}
+          <button
+            onClick={handleWishlist}
+            className={`absolute top-3.5 right-3.5 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+              inWishlist
+                ? 'bg-champagne-500 text-ink-900'
+                : 'bg-ivory-50/90 border border-stone-300 text-ink-600 hover:border-champagne-500 hover:text-champagne-600'
+            }`}
+            aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <Heart size={15} className={inWishlist ? 'fill-current' : ''} />
+          </button>
+
+          {isOutOfStock ? (
+            <div className="absolute inset-0 bg-ivory-50/50 flex items-center justify-center">
+              <span className="bg-ink-900 text-ivory-50 font-mono text-[10px] tracking-[0.16em] uppercase px-4 py-2 rounded-full">
+                Out of stock
+              </span>
+            </div>
+          ) : (
+            <button
+              onClick={handleQuickAdd}
+              disabled={adding}
+              className="absolute right-3.5 bottom-3.5 font-mono text-[10px] tracking-[0.14em] uppercase bg-ink-900 text-ivory-50 rounded-full px-4 py-2.5 opacity-100 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300 hover:bg-champagne-500 hover:text-ink-900 disabled:opacity-50"
+            >
+              {adding ? 'Adding…' : `Add — ${formatBDT(minPrice)}`}
+            </button>
+          )}
+        </div>
+
+        <div className="px-5 pt-4 pb-5 flex justify-between items-baseline gap-3">
+          <div className="min-w-0">
+            <h3 className="font-serif font-bold text-lg tracking-[0.01em] text-ink-900 truncate">{product.name}</h3>
+            <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ink-600 mt-0.5 truncate">
+              {product.category?.name ?? 'Nuhani'}
+            </p>
+            {rating && (
+              <div className="flex items-center gap-1 mt-1.5">
+                <div className="flex items-center">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star
+                      key={n}
+                      size={11}
+                      className={n <= Math.round(rating.avg) ? 'fill-champagne-500 text-champagne-500' : 'text-stone-300'}
+                    />
+                  ))}
+                </div>
+                <span className="font-mono text-[10px] text-ink-500">({rating.count})</span>
+              </div>
+            )}
+          </div>
+          <div className="text-right shrink-0">
+            <span className="font-mono font-bold text-ink-900 whitespace-nowrap">{formatBDT(minPrice)}</span>
+            {hasDiscount && (
+              <span className="block font-mono text-[11px] text-ink-400 line-through">{formatBDT(minCompare)}</span>
+            )}
+            {!isOutOfStock && (
+              <button
+                onClick={handleBuyNow}
+                className="font-semibold text-[12px] text-ink-600 hover:text-champagne-600 transition-colors mt-1 inline-flex items-center gap-1"
+              >
+                Buy now <span aria-hidden="true">→</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </Link>
+  )
+}

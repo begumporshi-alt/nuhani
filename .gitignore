@@ -1,0 +1,15 @@
+# dependencies / build
+node_modules/
+dist/
+*.tsbuildinfo
+
+# secrets — never commit
+.env
+.env.*
+!.env.example
+
+# tooling artifacts
+.DS_Store
+.vercel
+.playwright-mcp/
+.zcode/
