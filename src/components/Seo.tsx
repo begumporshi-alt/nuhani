@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async'
 
 const SITE_NAME = 'Nuhani'
 const SITE_URL = 'https://nuhani.com'
-const DEFAULT_IMAGE = 'https://i.ibb.co.com/v4388nf3/657371760-122097034964914680-2462231761944454697-n.jpg'
+const DEFAULT_IMAGE = 'https://ixgapnhajpaxjuysioxn.supabase.co/storage/v1/object/public/product-images/brand/og-image.jpg'
 const DEFAULT_DESCRIPTION =
   'Nuhani — considered clothing from Bangladesh. Premium fabrics, honest pricing, nationwide delivery.'
 
