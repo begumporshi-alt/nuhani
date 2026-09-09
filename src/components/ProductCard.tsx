@@ -107,7 +107,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <Link to={`/product/${product.slug}`} className="group block">
-      <div className="bg-ivory-200 rounded-[28px] border border-stone-200 overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-card flex flex-col">
+      <div className="bg-ivory-200 rounded-[20px] sm:rounded-[28px] border border-stone-200 overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-card flex flex-col">
         <div className="relative aspect-[4/4.6] overflow-hidden bg-ivory-100">
           <img
             src={image}
@@ -165,10 +165,12 @@ export default function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        <div className="px-5 pt-4 pb-5 flex justify-between items-baseline gap-3">
+        <div className="px-3.5 sm:px-5 pt-3.5 sm:pt-4 pb-4 sm:pb-5 flex flex-col gap-2 flex-1">
           <div className="min-w-0">
-            <h3 className="font-serif font-bold text-lg tracking-[0.01em] text-ink-900 truncate">{product.name}</h3>
-            <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ink-600 mt-0.5 truncate">
+            <h3 className="font-serif font-bold text-[15px] sm:text-lg tracking-[0.01em] text-ink-900 leading-snug break-words">
+              {product.name}
+            </h3>
+            <p className="font-mono text-[9px] sm:text-[10px] tracking-[0.16em] uppercase text-ink-600 mt-0.5 truncate">
               {product.category?.name ?? 'Nuhani'}
             </p>
             {rating && (
@@ -186,15 +188,19 @@ export default function ProductCard({ product }: { product: Product }) {
               </div>
             )}
           </div>
-          <div className="text-right shrink-0">
-            <span className="font-mono font-bold text-ink-900 whitespace-nowrap">{formatBDT(minPrice)}</span>
-            {hasDiscount && (
-              <span className="block font-mono text-[11px] text-ink-400 line-through">{formatBDT(minCompare)}</span>
-            )}
+          <div className="mt-auto flex items-baseline justify-between gap-3">
+            <div className="min-w-0">
+              <span className="font-mono font-bold text-sm sm:text-base text-ink-900 whitespace-nowrap">{formatBDT(minPrice)}</span>
+              {hasDiscount && (
+                <span className="ml-1.5 font-mono text-[10px] sm:text-[11px] text-ink-400 line-through whitespace-nowrap">
+                  {formatBDT(minCompare)}
+                </span>
+              )}
+            </div>
             {!isOutOfStock && (
               <button
                 onClick={handleBuyNow}
-                className="font-semibold text-[12px] text-ink-600 hover:text-champagne-600 transition-colors mt-1 inline-flex items-center gap-1"
+                className="font-semibold text-[12px] text-ink-600 hover:text-champagne-600 transition-colors inline-flex items-center gap-1 shrink-0"
               >
                 Buy now <span aria-hidden="true">→</span>
               </button>

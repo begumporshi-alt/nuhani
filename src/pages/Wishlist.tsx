@@ -58,7 +58,7 @@ export default function Wishlist() {
       <h1 className="text-3xl font-serif text-ink-800 mb-2">My Wishlist</h1>
       <p className="text-ink-400 text-sm mb-8">{items.length} saved items</p>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
         {items.map((item) => (
           <div key={item.id} className="relative">
             <ProductCard product={item.product as Product} />

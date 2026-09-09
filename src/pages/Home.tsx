@@ -459,10 +459,10 @@ export default function Home() {
         <div className="section-padding relative z-10">
           <p className="eyebrow-light justify-center">04 / 04 — The letter</p>
           <h2
-            className="font-serif font-semibold tracking-[-0.015em] text-[clamp(2.2rem,5vw,4rem)] leading-[1.04] mt-6 mb-4"
+            className="font-serif font-semibold tracking-[-0.015em] text-[clamp(2.2rem,5vw,4rem)] leading-[1.04] mt-6 mb-4 text-white"
             style={{ fontVariationSettings: '"SOFT" 85' }}
           >
-            Join the <em className="em-amber" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1' }}>good thread.</em>
+            Join the <em className="italic" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1' }}>good thread.</em>
           </h2>
           <p className="text-ivory-100/70 max-w-[46ch] mx-auto mb-9">
             One letter a month: new batches before anyone else, care guides,
