@@ -61,6 +61,82 @@
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
+  /* Diagonal corner ribbons (SALE / FEATURED) on product cards.
+     The bar overhangs the card corner and is clipped flush by the card's
+     overflow-hidden image container; the ::before/::after triangles are the
+     folded tails, placed where the bar crosses the card edges. */
+  .ribbon {
+    --ribbon-fold: #E8430D;
+    @apply absolute z-10 font-mono font-bold uppercase tracking-[0.16em] text-center;
+    width: 116px;
+    top: 14px;
+    padding: 5px 0 4px;
+    font-size: 9px;
+    line-height: 14px;
+    box-shadow: 0 2px 6px rgba(30, 23, 16, 0.18);
+  }
+  .ribbon::before,
+  .ribbon::after {
+    content: "";
+    position: absolute;
+    bottom: -7px;
+    width: 0;
+    height: 0;
+    border-top: 7px solid var(--ribbon-fold);
+  }
+  .ribbon::before {
+    left: 16px;
+    border-left: 7px solid transparent;
+  }
+  .ribbon::after {
+    right: 22px;
+    border-right: 7px solid transparent;
+  }
+  .ribbon--tr {
+    right: -38px;
+    transform: rotate(45deg);
+  }
+  .ribbon--tl {
+    left: -38px;
+    transform: rotate(-45deg);
+  }
+  .ribbon--sale {
+    @apply bg-champagne-500 text-ink-900;
+    --ribbon-fold: #E8430D;
+  }
+  .ribbon--featured {
+    @apply bg-ivory-50 text-ink-600;
+    border: 1px solid #D8CCB7;
+    --ribbon-fold: #C0B19A;
+  }
+  @media (min-width: 640px) {
+    .ribbon {
+      width: 132px;
+      top: 16px;
+      padding: 6px 0 5px;
+      font-size: 10px;
+      line-height: 15px;
+    }
+    .ribbon::before,
+    .ribbon::after {
+      bottom: -8px;
+      border-top-width: 8px;
+    }
+    .ribbon::before {
+      left: 18px;
+      border-left-width: 8px;
+    }
+    .ribbon::after {
+      right: 26px;
+      border-right-width: 8px;
+    }
+    .ribbon--tr {
+      right: -42px;
+    }
+    .ribbon--tl {
+      left: -42px;
+    }
+  }
   .section-padding {
     @apply px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto;
   }

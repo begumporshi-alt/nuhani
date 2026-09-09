@@ -116,29 +116,23 @@ export default function ProductCard({ product }: { product: Product }) {
             loading="lazy"
           />
 
-          {/* Chips */}
-          <div className="absolute top-3.5 left-3.5 flex flex-col items-start gap-1.5">
-            {hasDiscount && (
-              <span className="font-mono text-[9px] tracking-[0.16em] uppercase font-bold bg-champagne-500 text-ink-900 rounded-full px-2.5 py-1">
-                Sale
-              </span>
-            )}
-            {product.is_featured && (
-              <span className="font-mono text-[9px] tracking-[0.16em] uppercase bg-ivory-50 border border-stone-300 text-ink-600 rounded-full px-2.5 py-1">
-                Featured
-              </span>
-            )}
-            {isLowStock && !isOutOfStock && (
-              <span className="font-mono text-[9px] tracking-[0.16em] uppercase bg-ivory-50 border border-stone-300 text-ink-600 rounded-full px-2.5 py-1">
-                Low stock
-              </span>
-            )}
-          </div>
+          {/* Corner ribbons */}
+          {hasDiscount && <span className="ribbon ribbon--tr ribbon--sale">Sale</span>}
+          {product.is_featured && <span className="ribbon ribbon--tl ribbon--featured">Featured</span>}
+          {isLowStock && !isOutOfStock && (
+            <span
+              className={`absolute left-3.5 font-mono text-[9px] tracking-[0.16em] uppercase bg-ivory-50 border border-stone-300 text-ink-600 rounded-full px-2.5 py-1 ${
+                product.is_featured ? 'top-[62px] sm:top-[66px]' : 'top-3.5'
+              }`}
+            >
+              Low stock
+            </span>
+          )}
 
           {/* Wishlist */}
           <button
             onClick={handleWishlist}
-            className={`absolute top-3.5 right-3.5 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+            className={`absolute right-3.5 ${hasDiscount ? 'top-[60px] sm:top-[64px]' : 'top-3.5'} w-9 h-9 rounded-full flex items-center justify-center transition-all ${
               inWishlist
                 ? 'bg-champagne-500 text-ink-900'
                 : 'bg-ivory-50/90 border border-stone-300 text-ink-600 hover:border-champagne-500 hover:text-champagne-600'
