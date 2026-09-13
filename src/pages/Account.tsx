@@ -263,7 +263,7 @@ export default function Account() {
                   {wishlistItems.map((item) => (
                     <Link key={item.id} to={`/product/${(item.product as Product)?.slug ?? ''}`} className="card group block">
                       <div className="relative aspect-[4/5] overflow-hidden bg-ivory-100 rounded-t-2xl">
-                        <img src={(item.product as Product)?.images?.[0] ?? 'https://images.pexels.com/photos/307009/pexels-photo-307009.jpeg'} alt={(item.product as Product)?.name ?? ''} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src={(item.product as Product)?.images?.[0] ?? 'https://images.pexels.com/photos/7679723/pexels-photo-7679723.jpeg'} alt={(item.product as Product)?.name ?? ''} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       </div>
                       <div className="p-3">
                         <h3 className="font-serif text-sm text-ink-800 line-clamp-1">{pick((item.product as Product)?.name, (item.product as Product)?.name_bn)}</h3>

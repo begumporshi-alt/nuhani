@@ -269,7 +269,7 @@ export default function AdminProducts() {
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         <img
-                          src={product.images?.[0] ?? 'https://images.pexels.com/photos/307009/pexels-photo-307009.jpeg'}
+                          src={product.images?.[0] ?? 'https://images.pexels.com/photos/7679723/pexels-photo-7679723.jpeg'}
                           alt={product.name}
                           className="w-10 h-10 rounded-2xl object-cover"
                         />

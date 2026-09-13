@@ -24,15 +24,15 @@ with variants for testing the full e-commerce flow.
 -- CATEGORIES
 -- ============================================================
 INSERT INTO public.categories (name, slug, description, image_url, sort_order) VALUES
-  ('Baby', 'baby', 'Soft, safe clothing for your little ones', 'https://images.pexels.com/photos/1648387/pexels-photo-1648387.jpeg', 1),
+  ('Baby', 'baby', 'Soft, safe clothing for your little ones', 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg', 1),
   ('Mom', 'mom', 'Comfortable and elegant wear for mothers', 'https://images.pexels.com/photos/3933250/pexels-photo-3933250.jpeg', 2),
-  ('Bodysuits & Rompers', 'bodysuits-rompers', 'Soft cotton bodysuits and rompers for babies', 'https://images.pexels.com/photos/307009/pexels-photo-307009.jpeg', 1),
+  ('Bodysuits & Rompers', 'bodysuits-rompers', 'Soft cotton bodysuits and rompers for babies', 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg', 1),
   ('Sleepwear', 'sleepwear', 'Cozy sleepwear for peaceful nights', 'https://images.pexels.com/photos/62689/pexels-photo-62689.jpeg', 2),
   ('Outfits & Sets', 'outfits-sets', 'Matching outfits and sets for any occasion', 'https://images.pexels.com/photos/1620763/pexels-photo-1620763.jpeg', 3),
   ('Accessories', 'accessories', 'Bibs, hats, socks, and mittens', 'https://images.pexels.com/photos/264907/pexels-photo-264907.jpeg', 4),
-  ('Maternity Wear', 'maternity-wear', 'Comfortable and stylish maternity clothing', 'https://images.pexels.com/photos/8363905/pexels-photo-8363905.jpeg', 1),
+  ('Maternity Wear', 'maternity-wear', 'Comfortable and stylish maternity clothing', 'https://images.pexels.com/photos/1055691/pexels-photo-1055691.jpeg', 1),
   ('Nursing Wear', 'nursing-wear', 'Practical and beautiful nursing clothing', 'https://images.pexels.com/photos/3933250/pexels-photo-3933250.jpeg', 2),
-  ('Loungewear', 'loungewear', 'Relax in comfort and style', 'https://images.pexels.com/photos/1183266/pexels-photo-1183266.jpeg', 3)
+  ('Loungewear', 'loungewear', 'Relax in comfort and style', 'https://images.pexels.com/photos/1055691/pexels-photo-1055691.jpeg', 3)
 ON CONFLICT (slug) DO NOTHING;
 
 -- Set parent categories
@@ -51,7 +51,7 @@ INSERT INTO public.products (name, slug, description, category_id, images, tags,
     'soft-cotton-baby-bodysuit',
     'Made from 100% organic cotton, this ultra-soft bodysuit is gentle on your baby''s delicate skin. Features easy-snap buttons for quick diaper changes.',
     (SELECT id FROM public.categories WHERE slug = 'bodysuits-rompers'),
-    ARRAY['https://images.pexels.com/photos/307009/pexels-photo-307009.jpeg', 'https://images.pexels.com/photos/1648387/pexels-photo-1648387.jpeg'],
+    ARRAY['https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg', 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg'],
     ARRAY['organic', 'cotton', 'soft', 'newborn'],
     true, true
   ),
@@ -60,7 +60,7 @@ INSERT INTO public.products (name, slug, description, category_id, images, tags,
     'cozy-baby-sleepwear-set',
     'A two-piece sleepwear set designed for maximum comfort. Breathable fabric keeps your baby at the perfect temperature all night.',
     (SELECT id FROM public.categories WHERE slug = 'sleepwear'),
-    ARRAY['https://images.pexels.com/photos/62689/pexels-photo-62689.jpeg', 'https://images.pexels.com/photos/265722/pexels-photo-265722.jpeg'],
+    ARRAY['https://images.pexels.com/photos/62689/pexels-photo-62689.jpeg', 'https://images.pexels.com/photos/7679723/pexels-photo-7679723.jpeg'],
     ARRAY['sleepwear', 'cozy', 'breathable'],
     true, true
   ),
@@ -69,7 +69,7 @@ INSERT INTO public.products (name, slug, description, category_id, images, tags,
     'floral-baby-outfit-set',
     'A beautiful floral print outfit set perfect for special occasions. Includes top and matching pants.',
     (SELECT id FROM public.categories WHERE slug = 'outfits-sets'),
-    ARRAY['https://images.pexels.com/photos/1620763/pexels-photo-1620763.jpeg', 'https://images.pexels.com/photos/8363905/pexels-photo-8363905.jpeg'],
+    ARRAY['https://images.pexels.com/photos/1620763/pexels-photo-1620763.jpeg', 'https://images.pexels.com/photos/1055691/pexels-photo-1055691.jpeg'],
     ARRAY['floral', 'outfit', 'occasion'],
     false, true
   ),
@@ -93,7 +93,7 @@ INSERT INTO public.products (name, slug, description, category_id, images, tags,
     'elegant-maternity-maxi-dress',
     'A flowing maxi dress designed to grow with your bump. Made from soft, stretchy fabric that adapts to your changing body.',
     (SELECT id FROM public.categories WHERE slug = 'maternity-wear'),
-    ARRAY['https://images.pexels.com/photos/8363905/pexels-photo-8363905.jpeg', 'https://images.pexels.com/photos/3933250/pexels-photo-3933250.jpeg'],
+    ARRAY['https://images.pexels.com/photos/1055691/pexels-photo-1055691.jpeg', 'https://images.pexels.com/photos/3933250/pexels-photo-3933250.jpeg'],
     ARRAY['maternity', 'dress', 'elegant'],
     true, true
   ),
@@ -102,7 +102,7 @@ INSERT INTO public.products (name, slug, description, category_id, images, tags,
     'comfortable-nursing-top',
     'A stylish nursing top with hidden access panels for easy feeding. Soft, breathable cotton blend.',
     (SELECT id FROM public.categories WHERE slug = 'nursing-wear'),
-    ARRAY['https://images.pexels.com/photos/3933250/pexels-photo-3933250.jpeg', 'https://images.pexels.com/photos/1183266/pexels-photo-1183266.jpeg'],
+    ARRAY['https://images.pexels.com/photos/3933250/pexels-photo-3933250.jpeg', 'https://images.pexels.com/photos/1055691/pexels-photo-1055691.jpeg'],
     ARRAY['nursing', 'top', 'comfortable'],
     true, true
   ),
@@ -111,7 +111,7 @@ INSERT INTO public.products (name, slug, description, category_id, images, tags,
     'soft-mom-loungewear-set',
     'Relax in style with this ultra-soft loungewear set. Perfect for home, hospital, or everyday comfort.',
     (SELECT id FROM public.categories WHERE slug = 'loungewear'),
-    ARRAY['https://images.pexels.com/photos/1183266/pexels-photo-1183266.jpeg', 'https://images.pexels.com/photos/8363905/pexels-photo-8363905.jpeg'],
+    ARRAY['https://images.pexels.com/photos/1055691/pexels-photo-1055691.jpeg', 'https://images.pexels.com/photos/1055691/pexels-photo-1055691.jpeg'],
     ARRAY['loungewear', 'comfort', 'relax'],
     false, true
   ),
@@ -120,7 +120,7 @@ INSERT INTO public.products (name, slug, description, category_id, images, tags,
     'premium-maternity-kurti',
     'A beautiful kurti designed for the Bangladeshi mom. Features side panels that accommodate your growing bump with elegance.',
     (SELECT id FROM public.categories WHERE slug = 'maternity-wear'),
-    ARRAY['https://images.pexels.com/photos/8363905/pexels-photo-8363905.jpeg'],
+    ARRAY['https://images.pexels.com/photos/1055691/pexels-photo-1055691.jpeg'],
     ARRAY['maternity', 'kurti', 'traditional'],
     true, true
   )
@@ -186,6 +186,6 @@ ON CONFLICT (code) DO NOTHING;
 -- BANNERS
 -- ============================================================
 INSERT INTO public.banners (title, subtitle, image_url, link_url, button_text, sort_order, is_active) VALUES
-  ('New Arrivals', 'Discover our latest collection for baby and mom', 'https://images.pexels.com/photos/265722/pexels-photo-265722.jpeg', '/shop', 'Shop Now', 1, true),
+  ('New Arrivals', 'Discover our latest collection for baby and mom', 'https://images.pexels.com/photos/7679723/pexels-photo-7679723.jpeg', '/shop', 'Shop Now', 1, true),
   ('Summer Sale', 'Up to 30% off on selected items', 'https://images.pexels.com/photos/3933250/pexels-photo-3933250.jpeg', '/shop', 'View Deals', 2, true)
 ON CONFLICT DO NOTHING;

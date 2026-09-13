@@ -107,7 +107,7 @@ export default function Cart() {
             const variant = 'variant' in item ? item.variant : undefined
             if (!variant) return null
             const product = variant.product
-            const image = product?.images?.[0] ?? 'https://images.pexels.com/photos/307009/pexels-photo-307009.jpeg'
+            const image = product?.images?.[0] ?? 'https://images.pexels.com/photos/7679723/pexels-photo-7679723.jpeg'
 
             return (
               <div key={(item as { id?: string }).id ?? item.variant_id} className="card p-4 flex gap-4">

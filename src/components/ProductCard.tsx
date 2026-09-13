@@ -105,7 +105,7 @@ export default function ProductCard({ product }: { product: Product }) {
     }
   }
 
-  const image = product.images?.[0] ?? 'https://images.pexels.com/photos/307009/pexels-photo-307009.jpeg'
+  const image = product.images?.[0] ?? 'https://images.pexels.com/photos/7679723/pexels-photo-7679723.jpeg'
 
   return (
     <Link to={`/product/${product.slug}`} className="group block">

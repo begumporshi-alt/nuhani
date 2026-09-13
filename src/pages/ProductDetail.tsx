@@ -262,7 +262,7 @@ export default function ProductDetail() {
         {/* Image Gallery */}
         <div>
           <div className="aspect-square rounded-2xl overflow-hidden bg-ivory-100 mb-4">
-            <img src={product.images?.[selectedImage] ?? 'https://images.pexels.com/photos/307009/pexels-photo-307009.jpeg'} alt={product.name} className="w-full h-full object-cover" />
+            <img src={product.images?.[selectedImage] ?? 'https://images.pexels.com/photos/7679723/pexels-photo-7679723.jpeg'} alt={product.name} className="w-full h-full object-cover" />
           </div>
           {product.images && product.images.length > 1 && (
             <div className="flex gap-3 overflow-x-auto scrollbar-hide">
