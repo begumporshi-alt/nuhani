@@ -5,6 +5,7 @@ import { supabase, type Product, type Category, type Banner, type PublicSettings
 import ProductCard from '../components/ProductCard'
 import Seo from '../components/Seo'
 import { useToast } from '../contexts/ToastContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import { formatBDT } from '../lib/constants'
 
 const homeJsonLd = {
@@ -17,24 +18,6 @@ const homeJsonLd = {
   areaServed: 'BD',
 }
 
-const testimonials = [
-  {
-    quote: 'The fabric quality is genuinely premium — everything I ordered fits beautifully and washes well.',
-    name: 'Nusrat J.',
-    city: 'Dhaka',
-  },
-  {
-    quote: 'Ordered on Sunday, delivered by Tuesday in Chattogram. The packaging felt like a gift.',
-    name: 'Farhana R.',
-    city: 'Chattogram',
-  },
-  {
-    quote: 'Finally a brand that gets both the fit and the finish right. My everyday pieces are all from here now.',
-    name: 'Tahmina K.',
-    city: 'Sylhet',
-  },
-]
-
 export default function Home() {
   const [featured, setFeatured] = useState<Product[]>([])
   const [newArrivals, setNewArrivals] = useState<Product[]>([])
@@ -43,6 +26,7 @@ export default function Home() {
   const [settings, setSettings] = useState<PublicSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const { showToast } = useToast()
+  const { t, pick } = useLanguage()
   const [subscribing, setSubscribing] = useState(false)
   const [subscribed, setSubscribed] = useState(false)
   const [bannerIndex, setBannerIndex] = useState(0)
@@ -108,10 +92,16 @@ export default function Home() {
       newArrivals.find((p) => p.slug !== heroTagProduct?.slug))?.images?.[0] ?? null
   const banner = banners[bannerIndex]
 
+  const testimonials = [
+    { quote: t('home.quote1'), name: 'Nusrat J.', city: t('home.cityDhaka') },
+    { quote: t('home.quote2'), name: 'Farhana R.', city: t('home.cityChattogram') },
+    { quote: t('home.quote3'), name: 'Tahmina K.', city: t('home.citySylhet') },
+  ]
+
   const marqueeItems =
     categories.length > 0
-      ? categories.map((c) => c.name)
-      : ['Premium fabrics', 'Free delivery over ৳3,000', '7-day easy returns', 'Made in Bangladesh']
+      ? categories.map((c) => pick(c.name, c.name_bn))
+      : [t('home.premiumFabrics'), t('home.freeDelivery'), t('home.easyReturns'), t('home.madeInBD')]
 
   // Drifting fabric folds for dark sections
   const FabricFolds = () => (
@@ -178,30 +168,29 @@ export default function Home() {
         </div>
         <div className="section-padding relative z-10 grid grid-cols-1 lg:grid-cols-[1.05fr_.95fr] gap-14 items-center">
           <div>
-            <p className="eyebrow">Est. 2026 · Considered clothing, made in Bangladesh</p>
+            <p className="eyebrow">{t('home.eyebrow')}</p>
             <h1
               className="font-serif font-semibold leading-[0.98] tracking-[-0.02em] text-[clamp(3rem,8vw,6.5rem)] text-ink-900 mt-6 mb-7"
               style={{ fontVariationSettings: '"SOFT" 80' }}
             >
-              Clothing with<br /><em className="em-sun font-normal" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1' }}>quiet confidence.</em>
+              {t('home.heroTitleLine1')}<br /><em className="em-sun font-normal" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1' }}>{t('home.heroTitleEm')}</em>
             </h1>
             <p className="text-ink-600 text-base md:text-lg leading-relaxed max-w-[44ch] mb-9">
-              Considered pieces cut from premium fabrics — designed in Dhaka, made in
-              Bangladesh, and delivered to your door. Numbered small batches, finished by hand.
+              {t('home.heroParagraph')}
             </p>
             <div className="flex flex-wrap items-center gap-7">
-              <Link to="/shop" className="btn-primary">Shop the collection</Link>
+              <Link to="/shop" className="btn-primary">{t('home.shopCollection')}</Link>
               <Link
                 to="/about"
                 className="font-semibold inline-flex items-center gap-2 border-b-[1.5px] border-stone-300 pb-0.5 hover:border-champagne-500 hover:gap-3 transition-all"
               >
-                Our story <span aria-hidden="true">→</span>
+                {t('home.ourStory')} <span aria-hidden="true">→</span>
               </Link>
             </div>
             <div className="mt-12 flex flex-wrap gap-x-9 gap-y-2 font-mono text-[11px] tracking-[0.08em] text-ink-600">
-              <span><span className="text-champagne-500 tracking-[0.1em]" aria-hidden="true">★★★★★</span> Loved across Bangladesh</span>
-              <span>Free delivery over ৳3,000</span>
-              <span>7-day easy returns</span>
+              <span><span className="text-champagne-500 tracking-[0.1em]" aria-hidden="true">★★★★★</span> {t('home.lovedAcross')}</span>
+              <span>{t('home.freeDelivery')}</span>
+              <span>{t('home.easyReturns')}</span>
             </div>
           </div>
 
@@ -217,8 +206,8 @@ export default function Home() {
             <div className="arch-mask overflow-hidden bg-ivory-200 aspect-[4/5.1] relative rotate-2 hover:rotate-0 hover:scale-[1.01] transition-transform duration-500 border-[6px] border-ivory-50 outline outline-1 outline-stone-300 shadow-card">
               {heroImage ? (
                 <>
-                  <img src={heroImage} alt="Nuhani — new season" className="absolute inset-0 w-full h-full object-cover hidden md:block" />
-                  <img src={heroMobileImage ?? heroImage} alt="Nuhani — new season" className="absolute inset-0 w-full h-full object-cover md:hidden" />
+                  <img src={heroImage} alt={t('home.altNewSeason')} className="absolute inset-0 w-full h-full object-cover hidden md:block" />
+                  <img src={heroMobileImage ?? heroImage} alt={t('home.altNewSeason')} className="absolute inset-0 w-full h-full object-cover md:hidden" />
                 </>
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-b from-mink-100 via-ivory-50 to-champagne-100 flex flex-col items-center justify-center gap-4">
@@ -234,9 +223,9 @@ export default function Home() {
                 className="absolute -left-6 bottom-14 z-20 bg-ivory-50 border border-stone-300 rounded-2xl px-4 py-3 shadow-card flex flex-col animate-float hover:border-champagne-400 hover:-translate-y-1 transition-all"
               >
                 <span className="font-mono text-[9px] tracking-[0.14em] uppercase text-ink-600">
-                  {heroTagProduct.category?.name ?? 'New in'}
+                  {heroTagProduct.category ? pick(heroTagProduct.category.name, heroTagProduct.category.name_bn) : t('home.newIn')}
                 </span>
-                <span className="font-serif font-bold text-[15px] text-ink-900">{heroTagProduct.name}</span>
+                <span className="font-serif font-bold text-[15px] text-ink-900">{pick(heroTagProduct.name, heroTagProduct.name_bn)}</span>
                 <span className="font-mono font-bold text-sm text-champagne-600">{formatBDT(heroTagPrice)}</span>
               </Link>
             )}
@@ -266,16 +255,16 @@ export default function Home() {
           <div className="section-padding">
             <div className="flex flex-wrap justify-between items-end gap-8 mb-12">
               <div>
-                <p className="eyebrow">The collection</p>
+                <p className="eyebrow">{t('home.theCollection')}</p>
                 <h2
                   className="font-serif font-semibold tracking-[-0.015em] text-[clamp(2rem,4.2vw,3.4rem)] leading-[1.06] text-ink-900 mt-5 max-w-[16ch]"
                   style={{ fontVariationSettings: '"SOFT" 70' }}
                 >
-                  Few pieces. <em className="em-sun-deep" style={{ fontVariationSettings: '"SOFT" 100' }}>One endless wardrobe.</em>
+                  {t('home.collectionLine1')} <em className="em-sun-deep" style={{ fontVariationSettings: '"SOFT" 100' }}>{t('home.collectionEm')}</em>
                 </h2>
               </div>
               <div className="font-mono text-[11px] tracking-[0.2em] uppercase text-ink-600 text-right leading-[2]">
-                <b className="text-champagne-600">01</b> / 04<br />Collection<br />Batch 01 — 2026
+                <b className="text-champagne-600">01</b> / 04<br />{t('home.theCollection')}<br />{t('home.collectionBatch')}
               </div>
             </div>
 
@@ -290,7 +279,7 @@ export default function Home() {
                 to="/shop"
                 className="font-semibold inline-flex items-center gap-2 border-b-[1.5px] border-stone-300 pb-0.5 hover:border-champagne-500 hover:gap-3 transition-all"
               >
-                See the full collection <span aria-hidden="true">→</span>
+                {t('home.seeFullCollection')} <span aria-hidden="true">→</span>
               </Link>
             </p>
           </div>
@@ -310,36 +299,35 @@ export default function Home() {
         {!banner && <FabricFolds />}
 
         <div className="relative z-20 text-center text-ivory-50 section-padding py-20">
-          <p className="eyebrow-light justify-center">{banner ? banner.subtitle ?? 'The Nuhani edit' : 'Made properly'}</p>
+          <p className="eyebrow-light justify-center">{banner ? pick(banner.subtitle ?? t('home.theEdit'), banner.subtitle_bn) : t('home.madeProperly')}</p>
           <h2
             className="font-serif font-semibold tracking-[-0.015em] text-[clamp(2.2rem,5.2vw,4.2rem)] leading-[1.04] mt-6 mb-5"
             style={{ fontVariationSettings: '"SOFT" 80' }}
           >
-            Made for <em className="em-amber" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1' }}>{banner ? banner.title : 'golden days'}</em>, and every day after.
+            {t('home.madeForPre')}<em className="em-amber" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1' }}>{banner ? pick(banner.title, banner.title_bn) : t('home.goldenDays')}</em>{t('home.madeForPost')}
           </h2>
           <p className="text-ivory-100/85 max-w-[52ch] mx-auto mb-9 text-base md:text-lg">
-            Glare-free fabrics, honest stitches, colors that stay rich wash after wash —
-            clothing built for the long season of your life.
+            {t('home.lifestyleParagraph')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-px max-w-2xl mx-auto mb-9 bg-ivory-100/25 border border-ivory-100/25 rounded-2xl overflow-hidden backdrop-blur-sm">
             <div className="bg-ink-900/40 py-6 px-4">
               <b className="block font-serif font-semibold text-2xl md:text-3xl text-mink-400">100%</b>
-              <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ivory-100/80">Premium fabrics</span>
+              <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ivory-100/80">{t('home.statFabrics')}</span>
             </div>
             <div className="bg-ink-900/40 py-6 px-4">
               <b className="block font-serif font-semibold text-2xl md:text-3xl text-mink-400">64</b>
-              <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ivory-100/80">Districts delivered</span>
+              <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ivory-100/80">{t('home.statDistricts')}</span>
             </div>
             <div className="bg-ink-900/40 py-6 px-4">
               <b className="block font-serif font-semibold text-2xl md:text-3xl text-mink-400">7-day</b>
-              <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ivory-100/80">Easy returns</span>
+              <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ivory-100/80">{t('home.statReturns')}</span>
             </div>
           </div>
           <Link
             to={banner?.link_url ?? '/shop'}
             className="inline-flex items-center gap-2 bg-transparent text-ivory-50 px-7 py-3 rounded-full border-[1.5px] border-ivory-100/50 text-sm font-semibold hover:bg-ivory-50 hover:text-ink-900 hover:border-ivory-50 transition-all duration-300"
           >
-            {banner?.button_text ?? 'Find your piece'}
+            {pick(banner?.button_text ?? t('home.findYourPiece'), banner?.button_text_bn)}
           </Link>
         </div>
       </section>
@@ -349,16 +337,16 @@ export default function Home() {
         <div className="section-padding">
           <div className="flex flex-wrap justify-between items-end gap-8 mb-12">
             <div>
-              <p className="eyebrow">Just in</p>
+              <p className="eyebrow">{t('home.justIn')}</p>
               <h2
                 className="font-serif font-semibold tracking-[-0.015em] text-[clamp(2rem,4.2vw,3.4rem)] leading-[1.06] text-ink-900 mt-5 max-w-[16ch]"
                 style={{ fontVariationSettings: '"SOFT" 70' }}
               >
-                Fresh off the <em className="em-sun-deep" style={{ fontVariationSettings: '"SOFT" 100' }}>line.</em>
+                {t('home.newArrivalsLine1')} <em className="em-sun-deep" style={{ fontVariationSettings: '"SOFT" 100' }}>{t('home.newArrivalsEm')}</em>
               </h2>
             </div>
             <div className="font-mono text-[11px] tracking-[0.2em] uppercase text-ink-600 text-right leading-[2]">
-              <b className="text-champagne-600">02</b> / 04<br />New arrivals
+              <b className="text-champagne-600">02</b> / 04<br />{t('home.newArrivalsLabel')}
             </div>
           </div>
 
@@ -376,8 +364,8 @@ export default function Home() {
             </div>
           ) : (
             <div className="bg-ivory-200 border border-stone-200 rounded-[28px] px-6 py-16 text-center">
-              <p className="font-serif text-2xl text-ink-900 mb-1">Our first collection is arriving soon.</p>
-              <p className="text-sm text-ink-600">Subscribe below and be the first to know.</p>
+              <p className="font-serif text-2xl text-ink-900 mb-1">{t('home.arrivingSoon')}</p>
+              <p className="text-sm text-ink-600">{t('home.beFirstToKnow')}</p>
             </div>
           )}
         </div>
@@ -389,36 +377,33 @@ export default function Home() {
           <div className="relative max-w-[440px] w-full justify-self-center">
             <div className="arch-invert overflow-hidden bg-ivory-200 aspect-[4/4.7] relative -rotate-[1.5deg] hover:rotate-0 transition-transform duration-500 border-[6px] border-ivory-50 outline outline-1 outline-stone-300 shadow-card">
               {storyImage ? (
-                <img src={storyImage} alt="Inside the Nuhani studio" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                <img src={storyImage} alt={t('home.altStudio')} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-br from-ivory-200 via-mink-100 to-champagne-200 flex flex-col items-center justify-center gap-3">
-                  <span className="font-serif italic font-medium text-4xl text-ink-600">Est. 2026</span>
+                  <span className="font-serif italic font-medium text-4xl text-ink-600">{t('home.est2026')}</span>
                   <span className="w-10 h-px bg-ink-400" aria-hidden="true" />
-                  <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ink-600">Dhaka, Bangladesh</span>
+                  <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ink-600">{t('home.dhakaBD')}</span>
                 </div>
               )}
             </div>
           </div>
           <div>
-            <p className="eyebrow">03 / 04 — The story</p>
+            <p className="eyebrow">03 / 04 — {t('home.theStory')}</p>
             <h2
               className="font-serif font-semibold tracking-[-0.015em] text-[clamp(2rem,4.2vw,3.4rem)] leading-[1.06] text-ink-900 mt-5 mb-6 max-w-[16ch]"
               style={{ fontVariationSettings: '"SOFT" 70' }}
             >
-              Built for <em className="em-sun-deep" style={{ fontVariationSettings: '"SOFT" 100' }}>long</em> seasons.
+              {t('home.storyLine1')}<em className="em-sun-deep" style={{ fontVariationSettings: '"SOFT" 100' }}>{t('home.storyEm')}</em>{t('home.storyPost')}
             </h2>
             <p className="text-ink-600 max-w-[52ch] leading-relaxed">
-              Nuhani began with a simple frustration: beautiful clothing in Bangladesh was
-              either imported and expensive, or affordable and poorly made. We make a small
-              number of pieces, in numbered batches, from premium fabrics — and we finish
-              every piece by hand.
+              {t('home.storyParagraph')}
             </p>
             <ul className="mt-8">
               {[
-                { num: 'N°1', title: 'Premium fabrics', desc: 'Sourced for how they feel against the skin and how they age through seasons of wear.' },
-                { num: 'N°2', title: 'Made locally', desc: 'Cut and stitched by skilled hands across Bangladesh, finished and inspected by a person.' },
-                { num: 'N°3', title: 'Honest pricing', desc: 'No imported markups. One fair price for pieces that outlast the trend cycle.' },
-                { num: 'N°4', title: '7-day easy returns', desc: 'Wrong size, changed your mind? Simple exchanges, no questions.' },
+                { num: 'N°1', title: t('home.story1Title'), desc: t('home.story1Desc') },
+                { num: 'N°2', title: t('home.story2Title'), desc: t('home.story2Desc') },
+                { num: 'N°3', title: t('home.story3Title'), desc: t('home.story3Desc') },
+                { num: 'N°4', title: t('home.story4Title'), desc: t('home.story4Desc') },
               ].map((item) => (
                 <li key={item.num} className="flex gap-6 items-baseline py-4 border-t border-stone-300 last:border-b">
                   <span className="font-mono text-[11px] text-champagne-600 tracking-[0.1em] shrink-0">{item.num}</span>
@@ -457,19 +442,18 @@ export default function Home() {
       <section className="relative overflow-clip bg-ink-900 text-ivory-50 text-center py-28">
         <FabricFolds />
         <div className="section-padding relative z-10">
-          <p className="eyebrow-light justify-center">04 / 04 — The letter</p>
+          <p className="eyebrow-light justify-center">04 / 04 — {t('home.theLetter')}</p>
           <h2
             className="font-serif font-semibold tracking-[-0.015em] text-[clamp(2.2rem,5vw,4rem)] leading-[1.04] mt-6 mb-4 text-white"
             style={{ fontVariationSettings: '"SOFT" 85' }}
           >
-            Join the <em className="italic" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1' }}>good thread.</em>
+            {t('home.newsletterLine1')}<em className="italic" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1' }}>{t('home.newsletterEm')}</em>{t('home.newsletterPost')}
           </h2>
           <p className="text-ivory-100/70 max-w-[46ch] mx-auto mb-9">
-            One letter a month: new batches before anyone else, care guides,
-            and the occasional photo of a very good day in Dhaka.
+            {t('home.newsletterParagraph')}
           </p>
           {subscribed ? (
-            <p className="font-serif italic text-xl text-mink-400">You&rsquo;re on the list. Welcome to Nuhani.</p>
+            <p className="font-serif italic text-xl text-mink-400">{t('home.subscribed')}</p>
           ) : (
             <form
               onSubmit={async (e) => {
@@ -481,12 +465,12 @@ export default function Home() {
                 setSubscribing(true)
                 const { data, error } = await supabase.rpc('subscribe_newsletter', { p_email: email })
                 if (error) {
-                  showToast(error.message || 'Something went wrong. Please try again.', 'error')
+                  showToast(error.message || t('common.somethingWrong'), 'error')
                 } else if ((data as { already_subscribed?: boolean })?.already_subscribed) {
-                  showToast("You're already subscribed!", 'info')
+                  showToast(t('home.alreadySubscribed'), 'info')
                 } else {
                   setSubscribed(true)
-                  showToast('Subscribed successfully!', 'success')
+                  showToast(t('home.subscribedOk'), 'success')
                 }
                 setSubscribing(false)
               }}
@@ -500,11 +484,11 @@ export default function Home() {
                 disabled={subscribing}
               />
               <button type="submit" disabled={subscribing} className="btn-outline whitespace-nowrap">
-                {subscribing ? 'Signing up…' : 'Sign up'}
+                {subscribing ? t('home.signingUp') : t('home.signUp')}
               </button>
             </form>
           )}
-          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ivory-100/50 mt-6">No spam · Unsubscribe anytime</p>
+          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ivory-100/50 mt-6">{t('home.noSpam')}</p>
         </div>
       </section>
     </div>

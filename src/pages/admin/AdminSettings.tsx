@@ -82,9 +82,17 @@ export default function AdminSettings() {
   }
 
   const handleImageUpload = async (file: File, field: 'logo_url' | 'hero_image_url' | 'hero_mobile_image_url', setUploading: (v: boolean) => void) => {
+    if (!file.type.startsWith('image/')) {
+      showToast(`${file.name} is not an image`, 'error')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image is too large (max 5MB)', 'error')
+      return
+    }
     setUploading(true)
-    const ext = file.name.split('.').pop() ?? 'png'
-    const fileName = `${field.replace('_url', '')}-${Date.now()}.${ext}`
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
+    const fileName = `brand/${field.replace('_url', '')}-${Date.now()}.${ext}`
     const { error } = await supabase.storage.from('product-images').upload(fileName, file)
     if (error) {
       showToast('Failed to upload image', 'error')
@@ -124,12 +132,32 @@ export default function AdminSettings() {
               <span className="text-ink-300 text-sm">No logo</span>
             )}
           </div>
-          <div>
-            <label className="btn-secondary flex items-center gap-2 cursor-pointer">
+          <div className="flex-1">
+            <label className="btn-secondary flex items-center gap-2 cursor-pointer w-fit">
               <Upload size={16} /> {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
               <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], 'logo_url', setUploadingLogo)} />
             </label>
-            <p className="text-xs text-ink-400 mt-2">PNG or JPG, recommended 200x200px</p>
+            <p className="text-xs text-ink-400 mt-2">PNG or JPG, up to 5MB</p>
+            <div className="mt-4">
+              <label className="text-sm text-ink-600 mb-1.5 block">Or paste a logo URL / path</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={settings.logo_url ?? ''}
+                  onChange={(e) => setSettings({ ...settings, logo_url: e.target.value })}
+                  className="input-field"
+                  placeholder="/logo-mark-circle.png or https://..."
+                />
+                <button
+                  type="button"
+                  onClick={() => setSettings({ ...settings, logo_url: '/logo-mark.png' })}
+                  className="btn-secondary whitespace-nowrap shrink-0"
+                  title="Use the Nuhani emblem bundled with the app"
+                >
+                  Use bundled emblem
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -96,3 +96,91 @@ export const PAYMENT_METHODS = [
 export function formatBDT(amount: number): string {
   return '৳' + amount.toLocaleString('en-BD', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 }
+
+// Bangla display names for districts/divisions. DB and shipping rates stay keyed
+// by the English names above — these are only for rendering in Bangla mode.
+export const DISTRICT_NAMES_BN: Record<string, string> = {
+  Dhaka: 'ঢাকা',
+  Chittagong: 'চট্টগ্রাম',
+  Khulna: 'খুলনা',
+  Rajshahi: 'রাজশাহী',
+  Sylhet: 'সিলেট',
+  Barisal: 'বরিশাল',
+  Rangpur: 'রংপুর',
+  Mymensingh: 'ময়মনসিংহ',
+  Comilla: 'কুমিল্লা',
+  Narayanganj: 'নারায়ণগঞ্জ',
+  Gazipur: 'গাজীপুর',
+  Narsingdi: 'নরসিংদী',
+  Manikganj: 'মানিকগঞ্জ',
+  Munshiganj: 'মুন্সিগঞ্জ',
+  Faridpur: 'ফরিদপুর',
+  Madaripur: 'মাদারীপুর',
+  Gopalganj: 'গোপালগঞ্জ',
+  Tangail: 'টাঙ্গাইল',
+  Kishoreganj: 'কিশোরগঞ্জ',
+  Sherpur: 'শেরপুর',
+  Jamalpur: 'জামালপুর',
+  Netrokona: 'নেত্রকোণা',
+  Bogra: 'বগুড়া',
+  Pabna: 'পাবনা',
+  Sirajganj: 'সিরাজগঞ্জ',
+  Natore: 'নাটোর',
+  Nawabganj: 'নবাবগঞ্জ',
+  Naogaon: 'নওগাঁ',
+  Joypurhat: 'জয়পুরহাট',
+  Dinajpur: 'দিনাজপুর',
+  Thakurgaon: 'ঠাকুরগাঁও',
+  Panchagarh: 'পঞ্চগড়',
+  Nilphamari: 'নীলফামারী',
+  Kurigram: 'কুড়িগ্রাম',
+  Lalmonirhat: 'লালমনিরহাট',
+  Gaibandha: 'গাইবান্ধা',
+  Jashore: 'যশোর',
+  Satkhira: 'সাতক্ষীরা',
+  Magura: 'মাগুরা',
+  Narail: 'নড়াইল',
+  Jhenaidah: 'ঝিনাইদহ',
+  Chuadanga: 'চুয়াডাঙ্গা',
+  Kushtia: 'কুষ্টিয়া',
+  Meherpur: 'মেহেরপুর',
+  Bagerhat: 'বাগেরহাট',
+  Jhalokati: 'ঝালকাঠি',
+  Patuakhali: 'পটুয়াখালী',
+  Pirojpur: 'পিরোজপুর',
+  Barguna: 'বরগুনা',
+  Bhola: 'ভোলা',
+  Habiganj: 'হবিগঞ্জ',
+  Moulvibazar: 'মৌলভীবাজার',
+  Sunamganj: 'সুনামগঞ্জ',
+  "Cox's Bazar": 'কক্সবাজার',
+  Feni: 'ফেনী',
+  Brahmanbaria: 'ব্রাহ্মণবাড়িয়া',
+  Chandpur: 'চাঁদপুর',
+  Noakhali: 'নোয়াখালী',
+  Lakshmipur: 'লক্ষ্মীপুর',
+  Rangamati: 'রাঙ্গামাটি',
+  Khagrachari: 'খাগড়াছড়ি',
+  Bandarban: 'বান্দরবান',
+}
+
+export const DIVISION_NAMES_BN: Record<string, string> = {
+  Dhaka: 'ঢাকা',
+  Chittagong: 'চট্টগ্রাম',
+  Khulna: 'খুলনা',
+  Rajshahi: 'রাজশাহী',
+  Sylhet: 'সিলেট',
+  Barisal: 'বরিশাল',
+  Rangpur: 'রংপুর',
+  Mymensingh: 'ময়মনসিংহ',
+}
+
+export function districtName(district: string, lang: 'en' | 'bn'): string {
+  if (lang === 'bn') return DISTRICT_NAMES_BN[district] ?? district
+  return district
+}
+
+export function divisionName(division: string, lang: 'en' | 'bn'): string {
+  if (lang === 'bn') return DIVISION_NAMES_BN[division] ?? division
+  return division
+}

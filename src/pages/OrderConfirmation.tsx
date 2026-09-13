@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { CircleCheck as CheckCircle, Package, Truck, Chrome as HomeIcon, Clock, ShieldCheck, CircleAlert as AlertCircle, Phone, Send } from 'lucide-react'
 import { supabase, type Order } from '../lib/supabase'
-import { formatBDT } from '../lib/constants'
+import { formatBDT, districtName } from '../lib/constants'
+import { useLanguage } from '../contexts/LanguageContext'
 
 export default function OrderConfirmation() {
+  const { t, lang } = useLanguage()
   const { orderNumber } = useParams()
   const [searchParams] = useSearchParams()
   const [order, setOrder] = useState<Order | null>(null)
@@ -51,7 +53,7 @@ export default function OrderConfirmation() {
     } else {
       setOrder(null)
       setNeedPhone(true)
-      if (phone) setPhoneError('No order matches that order number and phone. Please check and try again.')
+      if (phone) setPhoneError(t('order.phoneError'))
     }
     setLoading(false)
   }
@@ -81,9 +83,9 @@ export default function OrderConfirmation() {
   if (needPhone) {
     return (
       <div className="section-padding py-20 max-w-md mx-auto text-center">
-        <h1 className="text-2xl font-serif text-ink-800 mb-2">Find your order</h1>
+        <h1 className="text-2xl font-serif text-ink-800 mb-2">{t('order.findOrder')}</h1>
         <p className="text-sm text-ink-500 mb-6">
-          Enter the phone number you used when placing order <span className="font-medium text-ink-700">#{orderNumber}</span> to view its details.
+          {t('order.phonePromptPre')}<span className="font-medium text-ink-700">#{orderNumber}</span>{t('order.phonePromptPost')}
         </p>
         <form
           onSubmit={(e) => {
@@ -100,10 +102,10 @@ export default function OrderConfirmation() {
             autoFocus
           />
           {phoneError && <p className="text-sm text-red-600 mb-3">{phoneError}</p>}
-          <button type="submit" className="btn-primary w-full">View Order</button>
+          <button type="submit" className="btn-primary w-full">{t('order.viewOrder')}</button>
         </form>
         <Link to="/" className="inline-block mt-6 text-sm text-ink-500 hover:text-ink-700 underline underline-offset-4">
-          Back to Home
+          {t('common.backHome')}
         </Link>
       </div>
     )
@@ -112,8 +114,8 @@ export default function OrderConfirmation() {
   if (!order) {
     return (
       <div className="section-padding py-20 text-center">
-        <h1 className="text-2xl font-serif text-ink-800 mb-4">Order not found</h1>
-        <Link to="/" className="btn-primary">Back to Home</Link>
+        <h1 className="text-2xl font-serif text-ink-800 mb-4">{t('order.notFound')}</h1>
+        <Link to="/" className="btn-primary">{t('common.backHome')}</Link>
       </div>
     )
   }
@@ -123,11 +125,19 @@ export default function OrderConfirmation() {
   const isPaymentFailed = paymentResult === 'failed' || order.payment_status === 'failed'
 
   const steps = [
-    { icon: CheckCircle, label: 'Order Placed', done: true },
-    { icon: Package, label: 'Processing', done: isPaid || isCOD },
-    { icon: Truck, label: 'Shipped', done: false },
-    { icon: HomeIcon, label: 'Delivered', done: false },
+    { icon: CheckCircle, label: t('order.stepPlaced'), done: true },
+    { icon: Package, label: t('order.stepProcessing'), done: isPaid || isCOD },
+    { icon: Truck, label: t('order.stepShipped'), done: false },
+    { icon: HomeIcon, label: t('order.stepDelivered'), done: false },
   ]
+
+  const payLabel = (m: string | null | undefined): string => {
+    if (!m) return ''
+    if (m === 'cod') return t('checkout.payCod')
+    if (m === 'bkash') return t('checkout.payBkash')
+    if (m === 'card') return t('checkout.payCard')
+    return m.charAt(0).toUpperCase() + m.slice(1)
+  }
 
   return (
     <div className="section-padding py-12 max-w-2xl mx-auto animate-fade-in">
@@ -136,14 +146,14 @@ export default function OrderConfirmation() {
           {isPaymentFailed ? <AlertCircle size={40} className="text-red-600" /> : <CheckCircle size={40} className="text-green-600" />}
         </div>
         <h1 className="text-3xl font-serif text-ink-800 mb-2">
-          {isPaymentFailed ? 'Payment Failed' : 'Thank You!'}
+          {isPaymentFailed ? t('order.paymentFailed') : t('order.thankYou')}
         </h1>
         <p className="text-ink-500">
           {isPaymentFailed
-            ? 'Your payment could not be processed. Please try again.'
-            : 'Your order has been placed successfully.'}
+            ? t('order.paymentFailedDesc')
+            : t('order.placedSuccessfully')}
         </p>
-        <p className="text-ink-700 font-medium mt-2">Order #{order.order_number}</p>
+        <p className="text-ink-700 font-medium mt-2">{t('order.number', { n: order.order_number })}</p>
       </div>
 
       {/* Payment status banner */}
@@ -152,8 +162,8 @@ export default function OrderConfirmation() {
           <div className="flex items-center gap-3">
             <AlertCircle size={20} className="text-red-600 shrink-0" />
             <div className="text-sm text-red-700">
-              <p className="font-medium">Payment Failed</p>
-              <p>Your order has been placed but payment is pending. Please complete payment to confirm your order.</p>
+              <p className="font-medium">{t('order.paymentFailed')}</p>
+              <p>{t('order.paymentPendingNote')}</p>
             </div>
           </div>
         </div>
@@ -170,12 +180,12 @@ export default function OrderConfirmation() {
             )}
             <div className="text-sm">
               <p className={`font-medium ${order.cod_verified ? 'text-green-700' : 'text-amber-700'}`}>
-                {order.cod_verified ? 'Order Verified' : 'Pending Verification'}
+                {order.cod_verified ? t('order.verified') : t('order.pendingVerification')}
               </p>
               <p className={order.cod_verified ? 'text-green-600' : 'text-amber-600'}>
                 {order.cod_verified
-                  ? 'Your order has been verified and will be dispatched soon.'
-                  : 'Your COD order will be verified via phone call before dispatch. Please keep your phone available.'}
+                  ? t('order.verifiedDesc')
+                  : t('order.codNote')}
               </p>
             </div>
           </div>
@@ -188,8 +198,8 @@ export default function OrderConfirmation() {
           <div className="flex items-center gap-3">
             <ShieldCheck size={20} className="text-green-600 shrink-0" />
             <div className="text-sm text-green-700">
-              <p className="font-medium">Payment Confirmed</p>
-              <p>Paid {formatBDT(order.total_amount)} via {order.payment_gateway ?? order.payment_method}</p>
+              <p className="font-medium">{t('order.paymentConfirmed')}</p>
+              <p>{t('order.paidVia', { price: formatBDT(order.total_amount), method: payLabel(order.payment_gateway ?? order.payment_method) })}</p>
             </div>
           </div>
         </div>
@@ -215,15 +225,15 @@ export default function OrderConfirmation() {
 
       {/* Order Details */}
       <div className="card p-6 mb-6">
-        <h2 className="text-lg font-serif text-ink-800 mb-4">Order Details</h2>
+        <h2 className="text-lg font-serif text-ink-800 mb-4">{t('order.details')}</h2>
         <div className="space-y-3">
           {order.order_items?.map((item) => (
             <div key={item.id} className="flex justify-between text-sm">
               <div>
                 <p className="text-ink-700 font-medium">{item.product_name}</p>
                 <p className="text-ink-400 text-xs">
-                  Qty: {item.quantity}
-                  {item.variant_details && (item.variant_details as Record<string, string>).size && ` · Size: ${(item.variant_details as Record<string, string>).size}`}
+                  {t('order.qty', { n: item.quantity })}
+                  {item.variant_details && (item.variant_details as Record<string, string>).size && ` · ${t('order.sizeLabel', { v: (item.variant_details as Record<string, string>).size })}`}
                 </p>
               </div>
               <span className="text-ink-700 font-medium">{formatBDT(item.total_price)}</span>
@@ -232,21 +242,21 @@ export default function OrderConfirmation() {
         </div>
         <div className="border-t border-stone-200 mt-4 pt-4 space-y-2 text-sm">
           <div className="flex justify-between text-ink-600">
-            <span>Subtotal</span>
+            <span>{t('cart.subtotal')}</span>
             <span>{formatBDT(order.subtotal)}</span>
           </div>
           {order.discount_amount > 0 && (
             <div className="flex justify-between text-green-600">
-              <span>Discount</span>
+              <span>{t('cart.discount')}</span>
               <span>-{formatBDT(order.discount_amount)}</span>
             </div>
           )}
           <div className="flex justify-between text-ink-600">
-            <span>Shipping</span>
-            <span>{order.shipping_amount === 0 ? 'Free' : formatBDT(order.shipping_amount)}</span>
+            <span>{t('cart.shipping')}</span>
+            <span>{order.shipping_amount === 0 ? t('checkout.free') : formatBDT(order.shipping_amount)}</span>
           </div>
           <div className="flex justify-between text-lg font-semibold text-ink-800 border-t border-stone-200 pt-2">
-            <span>Total</span>
+            <span>{t('cart.total')}</span>
             <span>{formatBDT(order.total_amount)}</span>
           </div>
         </div>
@@ -254,7 +264,7 @@ export default function OrderConfirmation() {
 
       {/* Shipping Address */}
       <div className="card p-6 mb-6">
-        <h2 className="text-lg font-serif text-ink-800 mb-3">Shipping Address</h2>
+        <h2 className="text-lg font-serif text-ink-800 mb-3">{t('checkout.shippingAddress')}</h2>
         <div className="text-sm text-ink-500">
           {(() => {
             const addr = order.shipping_address as Record<string, string>
@@ -263,7 +273,7 @@ export default function OrderConfirmation() {
                 <p className="font-medium text-ink-700">{addr?.full_name}</p>
                 <p>{addr?.address_line1}</p>
                 {addr?.address_line2 && <p>{addr.address_line2}</p>}
-                <p>{addr?.city}, {addr?.district}</p>
+                <p>{addr?.city}, {addr?.district ? districtName(addr.district, lang) : ''}</p>
                 <p>{addr?.phone}</p>
               </>
             )
@@ -273,24 +283,24 @@ export default function OrderConfirmation() {
 
       {/* Payment Info */}
       <div className="card p-6 mb-8">
-        <h2 className="text-lg font-serif text-ink-800 mb-3">Payment</h2>
+        <h2 className="text-lg font-serif text-ink-800 mb-3">{t('checkout.payment')}</h2>
         <div className="flex justify-between text-sm">
-          <span className="text-ink-600 capitalize">{order.payment_method}</span>
+          <span className="text-ink-600">{payLabel(order.payment_method)}</span>
           <span className={`font-medium ${isPaid ? 'text-green-600' : isPaymentFailed ? 'text-red-600' : 'text-amber-600'}`}>
-            {isPaid ? 'Paid' : isPaymentFailed ? 'Failed' : 'Pending'}
+            {isPaid ? t('order.paid') : isPaymentFailed ? t('order.failed') : t('order.pending')}
           </span>
         </div>
         {isCOD && !order.cod_verified && (
           <div className="flex items-center gap-2 mt-3 text-xs text-amber-600">
             <Phone size={14} />
-            <span>Verification call will be made to {order.guest_phone ?? 'your phone'} before dispatch.</span>
+            <span>{t('order.verificationCall', { phone: order.guest_phone ?? '—' })}</span>
           </div>
         )}
       </div>
 
       <div className="flex gap-4">
-        <Link to="/shop" className="btn-primary flex-1 text-center">Continue Shopping</Link>
-        {order.user_id && <Link to="/account" className="btn-outline flex-1 text-center">View Orders</Link>}
+        <Link to="/shop" className="btn-primary flex-1 text-center">{t('cart.continueShopping')}</Link>
+        {order.user_id && <Link to="/account" className="btn-outline flex-1 text-center">{t('order.viewOrders')}</Link>}
       </div>
 
       {telegramBot && (
@@ -301,7 +311,7 @@ export default function OrderConfirmation() {
           className="mt-6 flex items-center justify-center gap-2 w-full py-3 rounded-full bg-[#229ED9] text-white text-sm font-medium hover:bg-[#1d8ec2] transition-colors"
         >
           <Send size={16} />
-          Track this order on Telegram
+          {t('order.trackTelegram')}
         </a>
       )}
     </div>

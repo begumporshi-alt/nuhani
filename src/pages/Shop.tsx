@@ -4,6 +4,7 @@ import { SlidersHorizontal, X, ChevronDown, Check } from 'lucide-react'
 import { supabase, type Product, type Category } from '../lib/supabase'
 import ProductCard from '../components/ProductCard'
 import Seo from '../components/Seo'
+import { useLanguage } from '../contexts/LanguageContext'
 
 // Multi-select dropdown chip
 function FilterDropdown({
@@ -18,6 +19,7 @@ function FilterDropdown({
   onToggle: (v: string) => void
 }) {
   const [open, setOpen] = useState(false)
+  const { t } = useLanguage()
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -82,7 +84,7 @@ function FilterDropdown({
                 onClick={() => options.forEach((o) => selected.includes(o) && onToggle(o))}
                 className="w-full text-left px-4 py-1.5 text-xs text-ink-400 hover:text-ink-600 transition-colors"
               >
-                Clear all
+                {t('shop.clearAll')}
               </button>
             </>
           )}
@@ -93,6 +95,7 @@ function FilterDropdown({
 }
 
 export default function Shop() {
+  const { t, pick } = useLanguage()
   const { categorySlug } = useParams()
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q') ?? ''
@@ -260,7 +263,7 @@ export default function Shop() {
   const SidebarFilters = () => (
     <div className="space-y-7">
       <div>
-        <h4 className="font-semibold text-ink-800 text-sm uppercase tracking-wide mb-3">Category</h4>
+        <h4 className="font-semibold text-ink-800 text-sm uppercase tracking-wide mb-3">{t('shop.category')}</h4>
         <div className="space-y-0.5">
           <button
             onClick={() => setSelectedCategory(null)}
@@ -268,7 +271,7 @@ export default function Shop() {
               !selectedCategory ? 'bg-mink-100 text-ink-700 font-medium' : 'text-ink-500 hover:bg-ivory-100'
             }`}
           >
-            All Products
+            {t('shop.allProducts')}
           </button>
           {categories.filter((c) => !c.parent_id).map((parent) => {
             const children = categories.filter((c) => c.parent_id === parent.id)
@@ -292,7 +295,7 @@ export default function Shop() {
                     isParentSelected || hasActiveChild ? 'text-ink-700 font-medium' : 'text-ink-600 hover:bg-ivory-100'
                   }`}
                 >
-                  <span className="flex-1">{parent.name}</span>
+                  <span className="flex-1">{pick(parent.name, parent.name_bn)}</span>
                   {children.length > 0 && (
                     <ChevronDown
                       size={14}
@@ -317,7 +320,7 @@ export default function Shop() {
                               : 'text-ink-400 hover:text-ink-500 hover:bg-ivory-50'
                           }`}
                         >
-                          {child.name}
+                          {pick(child.name, child.name_bn)}
                         </button>
                       ))}
                     </div>
@@ -330,7 +333,7 @@ export default function Shop() {
       </div>
 
       <div>
-        <h4 className="font-semibold text-ink-800 text-sm uppercase tracking-wide mb-3">Price Range</h4>
+        <h4 className="font-semibold text-ink-800 text-sm uppercase tracking-wide mb-3">{t('shop.priceRange')}</h4>
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-ink-400 pointer-events-none">৳</span>
@@ -344,7 +347,7 @@ export default function Shop() {
               className={`w-full pl-6 pr-2 py-1.5 rounded-2xl border bg-white text-sm text-ink-700 focus:outline-none focus:ring-2 focus:ring-mink-300 transition-colors ${
                 hasPendingPriceChange ? 'border-mink-400' : 'border-stone-300'
               }`}
-              placeholder="Min"
+              placeholder={t('shop.min')}
             />
           </div>
           <span className="text-ink-300 self-center text-sm">—</span>
@@ -360,7 +363,7 @@ export default function Shop() {
               className={`w-full pl-6 pr-2 py-1.5 rounded-2xl border bg-white text-sm text-ink-700 focus:outline-none focus:ring-2 focus:ring-mink-300 transition-colors ${
                 hasPendingPriceChange ? 'border-mink-400' : 'border-stone-300'
               }`}
-              placeholder="Max"
+              placeholder={t('shop.max')}
             />
           </div>
         </div>
@@ -374,7 +377,7 @@ export default function Shop() {
                 : 'opacity-0 pointer-events-none bg-ivory-200 text-ink-300'
             }`}
           >
-            Apply
+            {t('common.apply')}
           </button>
           {(priceRange[0] > 0 || priceRange[1] < maxPrice) && !hasPendingPriceChange && (
             <button
@@ -385,7 +388,7 @@ export default function Shop() {
               }}
               className="text-xs text-ink-400 hover:text-ink-600 transition-colors"
             >
-              Reset price
+              {t('shop.resetPrice')}
             </button>
           )}
         </div>
@@ -400,7 +403,7 @@ export default function Shop() {
 
       {allSizes.length > 0 && (
         <div>
-          <h4 className="font-semibold text-ink-800 text-sm uppercase tracking-wide mb-3">Size</h4>
+          <h4 className="font-semibold text-ink-800 text-sm uppercase tracking-wide mb-3">{t('shop.size')}</h4>
           <div className="flex flex-wrap gap-2">
             {allSizes.map((size) => (
               <button
@@ -421,7 +424,7 @@ export default function Shop() {
 
       {allColors.length > 0 && (
         <div>
-          <h4 className="font-semibold text-ink-800 text-sm uppercase tracking-wide mb-3">Color</h4>
+          <h4 className="font-semibold text-ink-800 text-sm uppercase tracking-wide mb-3">{t('shop.color')}</h4>
           <div className="flex flex-wrap gap-2">
             {allColors.map((color) => (
               <button
@@ -442,7 +445,7 @@ export default function Shop() {
 
       {allAges.length > 0 && (
         <div>
-          <h4 className="font-semibold text-ink-800 text-sm uppercase tracking-wide mb-3">Age</h4>
+          <h4 className="font-semibold text-ink-800 text-sm uppercase tracking-wide mb-3">{t('shop.age')}</h4>
           <div className="flex flex-wrap gap-2">
             {allAges.map((age) => (
               <button
@@ -463,14 +466,17 @@ export default function Shop() {
     </div>
   )
 
-  const activeCategory = selectedCategory
-    ? categories.find((c) => c.slug === selectedCategory)?.name
+  const activeCategoryName = selectedCategory
+    ? categories.find((c) => c.slug === selectedCategory)
+    : undefined
+  const activeCategory = activeCategoryName
+    ? pick(activeCategoryName.name, activeCategoryName.name_bn)
     : undefined
   const shopTitle = activeCategory
-    ? `${activeCategory} Clothing`
+    ? t('shop.categoryTitle', { name: activeCategory })
     : searchQuery
-    ? `Search: ${searchQuery}`
-    : 'Shop All'
+    ? t('shop.searchTitle', { q: searchQuery })
+    : t('nav.shopAll')
 
   return (
     <div className="section-padding py-8 animate-fade-in">
@@ -487,12 +493,12 @@ export default function Shop() {
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-serif text-ink-900 mb-2">
           {selectedCategory
-            ? categories.find((c) => c.slug === selectedCategory)?.name ?? 'Shop'
+            ? pick(categories.find((c) => c.slug === selectedCategory)?.name, categories.find((c) => c.slug === selectedCategory)?.name_bn) ?? t('nav.shop')
             : searchQuery
-            ? `Results for "${searchQuery}"`
-            : 'Shop All'}
+            ? t('shop.resultsFor', { q: searchQuery })
+            : t('nav.shopAll')}
         </h1>
-        <p className="eyebrow">{filtered.length} products</p>
+        <p className="eyebrow">{t('shop.productCount', { n: filtered.length })}</p>
       </div>
 
       {/* Category strip — horizontal scroll */}
@@ -503,7 +509,7 @@ export default function Shop() {
             !selectedCategory ? 'text-ink-900 border-b border-ink-900 pb-1' : 'text-stone-500 hover:text-ink-900 pb-1'
           }`}
         >
-          All
+          {t('shop.all')}
         </button>
         {categories.filter((c) => !c.parent_id).map((parent) => (
           <button
@@ -513,7 +519,7 @@ export default function Shop() {
               selectedCategory === parent.slug ? 'text-ink-900 border-b border-ink-900 pb-1' : 'text-stone-500 hover:text-ink-900 pb-1'
             }`}
           >
-            {parent.name}
+            {pick(parent.name, parent.name_bn)}
           </button>
         ))}
       </div>
@@ -531,7 +537,7 @@ export default function Shop() {
             }`}
           >
             <SlidersHorizontal size={15} />
-            Filters
+            {t('shop.filters')}
             {totalActiveFilters > 0 && (
               <span className="flex items-center justify-center w-4 h-4 rounded-full bg-ink-600 text-white text-[10px] font-bold">
                 {totalActiveFilters}
@@ -543,7 +549,7 @@ export default function Shop() {
           <div className="hidden lg:flex items-center gap-2 flex-wrap">
             {allSizes.length > 0 && (
               <FilterDropdown
-                label="Size"
+                label={t('shop.size')}
                 options={allSizes}
                 selected={selectedSizes}
                 onToggle={toggleSize}
@@ -551,7 +557,7 @@ export default function Shop() {
             )}
             {allColors.length > 0 && (
               <FilterDropdown
-                label="Color"
+                label={t('shop.color')}
                 options={allColors}
                 selected={selectedColors}
                 onToggle={toggleColor}
@@ -559,7 +565,7 @@ export default function Shop() {
             )}
             {allAges.length > 0 && (
               <FilterDropdown
-                label="Age"
+                label={t('shop.age')}
                 options={allAges}
                 selected={selectedAges}
                 onToggle={toggleAge}
@@ -580,7 +586,7 @@ export default function Shop() {
                   className={`w-20 pl-5 pr-2 py-1.5 rounded-full border bg-white text-xs text-ink-700 focus:outline-none transition-colors ${
                     hasPendingPriceChange ? 'border-mink-400' : 'border-stone-300'
                   }`}
-                  placeholder="Min"
+                  placeholder={t('shop.min')}
                 />
               </div>
               <span className="text-stone-300 text-xs">—</span>
@@ -596,7 +602,7 @@ export default function Shop() {
                   className={`w-20 pl-5 pr-2 py-1.5 rounded-full border bg-white text-xs text-ink-700 focus:outline-none transition-colors ${
                     hasPendingPriceChange ? 'border-mink-400' : 'border-stone-300'
                   }`}
-                  placeholder="Max"
+                  placeholder={t('shop.max')}
                 />
               </div>
               <button
@@ -608,7 +614,7 @@ export default function Shop() {
                     : 'text-stone-400 cursor-default'
                 }`}
               >
-                Apply
+                {t('common.apply')}
               </button>
             </div>
 
@@ -621,7 +627,7 @@ export default function Shop() {
                 }}
                 className="flex items-center gap-1 px-3 py-2 rounded-2xl text-sm text-ink-400 hover:text-ink-600 transition-colors"
               >
-                <X size={14} /> Clear
+                <X size={14} /> {t('shop.clear')}
               </button>
             )}
           </div>
@@ -633,10 +639,10 @@ export default function Shop() {
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
               className="px-4 py-2 rounded-full border border-stone-300 bg-white text-sm text-ink-700 focus:outline-none focus:border-ink-500"
             >
-              <option value="newest">Newest</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="name">Name: A to Z</option>
+              <option value="newest">{t('shop.sortNewest')}</option>
+              <option value="price-low">{t('shop.sortPriceLow')}</option>
+              <option value="price-high">{t('shop.sortPriceHigh')}</option>
+              <option value="name">{t('shop.sortName')}</option>
             </select>
           </div>
         </div>
@@ -688,7 +694,7 @@ export default function Shop() {
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-stone-500 text-lg font-serif">No products found. Try adjusting your filters.</p>
+            <p className="text-stone-500 text-lg font-serif">{t('shop.noProducts')}</p>
           </div>
         )}
       </div>
@@ -702,7 +708,7 @@ export default function Shop() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-serif text-ink-800">Filters</h3>
+              <h3 className="text-xl font-serif text-ink-800">{t('shop.filters')}</h3>
               <button onClick={() => setShowFilters(false)} className="text-ink-500 hover:text-ink-700">
                 <X size={24} />
               </button>

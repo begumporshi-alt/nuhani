@@ -8,7 +8,7 @@ export default function Footer() {
   const [settings, setSettings] = useState<PublicSettings | null>(null)
   const [logoError, setLogoError] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
-  const { t } = useLanguage()
+  const { t, pick } = useLanguage()
 
   useEffect(() => {
     fetchPublicSettings().then(setSettings)
@@ -21,7 +21,7 @@ export default function Footer() {
       .then(({ data }) => setCategories((data as Category[]) ?? []))
   }, [])
 
-  const logoUrl = settings?.logo_url ?? '/logo.svg'
+  const logoUrl = settings?.logo_url ?? '/logo-mark.png'
   const siteName = settings?.site_name ?? 'Nuhani'
   const phone = settings?.phone ?? '+880 1700 000000'
   const email = settings?.email ?? 'hello@nuhani.com'
@@ -38,12 +38,12 @@ export default function Footer() {
             {logoError ? (
               <span className="brand-title-light text-2xl block mb-4">{siteName}<span className="text-champagne-500">.</span></span>
             ) : (
-              <div className="h-12 w-auto min-w-[40px] mb-4 brightness-0 invert">
+              <div className="h-12 w-auto min-w-[40px] mb-4">
                 <img src={logoUrl} alt={siteName} className="h-12 w-auto" onError={() => setLogoError(true)} />
               </div>
             )}
             <p className="font-serif italic text-xl text-ivory-100/85 max-w-[22ch] leading-snug mb-5">
-              Small batches, honest prices, made in Bangladesh.
+              {t('footer.tagline')}
             </p>
             <div className="flex gap-5 font-mono text-[11px] uppercase tracking-[0.14em]">
               {settings?.instagram_url && (
@@ -75,7 +75,7 @@ export default function Footer() {
             <ul className="space-y-2.5 text-sm">
               {categories.slice(0, 3).map((c) => (
                 <li key={c.id}>
-                  <Link to={`/shop/${c.slug}`} className="text-ivory-100/70 hover:text-champagne-500 transition-colors">{c.name}</Link>
+                  <Link to={`/shop/${c.slug}`} className="text-ivory-100/70 hover:text-champagne-500 transition-colors">{pick(c.name, c.name_bn)}</Link>
                 </li>
               ))}
               <li><Link to="/shop" className="text-ivory-100/70 hover:text-champagne-500 transition-colors">{t('nav.shopAll')}</Link></li>
@@ -106,8 +106,8 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-3 mt-12 pt-6 border-t border-ivory-100/15 font-mono text-[10px] tracking-[0.14em] uppercase text-ivory-100/45">
-          <span>&copy; {new Date().getFullYear()} {siteName} — All rights reserved</span>
-          <span>Made in Bangladesh</span>
+          <span>&copy; {new Date().getFullYear()} {siteName} — {t('footer.rights')}</span>
+          <span>{t('footer.madeIn')}</span>
         </div>
       </div>
     </footer>

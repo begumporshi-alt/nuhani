@@ -52,6 +52,7 @@ export type Profile = {
 export type Category = {
   id: string
   name: string
+  name_bn: string | null
   slug: string
   description: string | null
   image_url: string | null
@@ -64,6 +65,7 @@ export type Category = {
 export type Product = {
   id: string
   name: string
+  name_bn: string | null
   slug: string
   description: string | null
   description_bn: string | null
@@ -190,10 +192,13 @@ export type Coupon = {
 export type Banner = {
   id: string
   title: string
+  title_bn: string | null
   subtitle: string | null
+  subtitle_bn: string | null
   image_url: string
   link_url: string | null
   button_text: string | null
+  button_text_bn: string | null
   sort_order: number
   is_active: boolean
   created_at: string

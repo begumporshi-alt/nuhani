@@ -19,7 +19,7 @@ export default function Navbar() {
   const [categories, setCategories] = useState<Category[]>([])
   const { itemCount } = useCart()
   const { session, profile } = useAuth()
-  const { lang, toggleLang, t } = useLanguage()
+  const { lang, toggleLang, t, pick } = useLanguage()
   const navigate = useNavigate()
   const searchRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -42,7 +42,7 @@ export default function Navbar() {
       .then(({ data }) => setCategories((data as Category[]) ?? []))
   }, [])
 
-  const logoUrl = settings?.logo_url ?? '/logo.svg'
+  const logoUrl = settings?.logo_url ?? '/logo-mark.png'
   const siteName = settings?.site_name ?? 'Nuhani'
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function Navbar() {
 
   const navLinks = [
     { label: t('nav.shopAll'), path: '/shop' },
-    ...categories.slice(0, 3).map((c) => ({ label: c.name, path: `/shop/${c.slug}` })),
+    ...categories.slice(0, 3).map((c) => ({ label: pick(c.name, c.name_bn), path: `/shop/${c.slug}` })),
     { label: t('nav.about'), path: '/about' },
     { label: t('nav.contact'), path: '/contact' },
   ]
@@ -110,7 +110,7 @@ export default function Navbar() {
             <button
               className="lg:hidden text-ink-900"
               onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Menu"
+              aria-label={t('nav.menu')}
             >
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
@@ -120,15 +120,20 @@ export default function Navbar() {
                   {siteName}<span className="text-champagne-500">.</span>
                 </span>
               ) : (
-                <div className="relative h-10 w-auto min-w-[60px] flex items-center">
-                  {!logoLoaded && <div className="logo-skeleton absolute inset-0 min-w-[60px]" />}
-                  <img
-                    src={logoUrl}
-                    alt={siteName}
-                    className={`h-10 w-auto transition-opacity duration-500 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
-                    onLoad={() => setLogoLoaded(true)}
-                    onError={() => setLogoError(true)}
-                  />
+                <div className="relative flex items-center gap-2.5">
+                  <div className="relative h-10 w-auto min-w-[60px] flex items-center">
+                    {!logoLoaded && <div className="logo-skeleton absolute inset-0 min-w-[60px]" />}
+                    <img
+                      src={logoUrl}
+                      alt={siteName}
+                      className={`h-10 w-auto transition-opacity duration-500 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                      onLoad={() => setLogoLoaded(true)}
+                      onError={() => setLogoError(true)}
+                    />
+                  </div>
+                  <span className="brand-title uppercase text-[1.1rem] sm:text-[1.3rem] leading-none">
+                    {siteName}
+                  </span>
                 </div>
               )}
             </Link>
@@ -148,10 +153,10 @@ export default function Navbar() {
           </ul>
 
           <div className="flex items-center gap-4 md:gap-5">
-            <button onClick={() => setSearchOpen(!searchOpen)} className="text-ink-900 hover:text-champagne-600 transition-colors" aria-label="Search">
+            <button onClick={() => setSearchOpen(!searchOpen)} className="text-ink-900 hover:text-champagne-600 transition-colors" aria-label={t('common.search')}>
               <Search size={19} />
             </button>
-            <button onClick={toggleLang} className="hidden sm:flex items-center gap-1 text-ink-900 hover:text-champagne-600 transition-colors" aria-label="Switch language">
+            <button onClick={toggleLang} className="flex items-center gap-1 text-ink-900 hover:text-champagne-600 transition-colors" aria-label={t('nav.switchLanguage')}>
               <Globe size={16} />
               <span className="font-mono text-[11px]">{lang === 'en' ? 'বাং' : 'EN'}</span>
             </button>
@@ -160,13 +165,13 @@ export default function Navbar() {
                 {t('nav.admin')}
               </Link>
             )}
-            <Link to={session ? '/account' : '/login'} className="text-ink-900 hover:text-champagne-600 transition-colors" aria-label="Account">
+            <Link to={session ? '/account' : '/login'} className="text-ink-900 hover:text-champagne-600 transition-colors" aria-label={t('nav.account')}>
               <User size={19} />
             </Link>
-            <Link to="/wishlist" className="hidden sm:block text-ink-900 hover:text-champagne-600 transition-colors" aria-label="Wishlist">
+            <Link to="/wishlist" className="hidden sm:block text-ink-900 hover:text-champagne-600 transition-colors" aria-label={t('nav.wishlist')}>
               <Heart size={19} />
             </Link>
-            <Link to="/cart" className="relative text-ink-900 hover:text-champagne-600 transition-colors" aria-label="Cart">
+            <Link to="/cart" className="relative text-ink-900 hover:text-champagne-600 transition-colors" aria-label={t('nav.cart')}>
               <ShoppingBag size={19} />
               {itemCount > 0 && (
                 <span className="absolute -top-1.5 -right-2 bg-champagne-500 text-ink-900 text-[10px] font-bold min-w-[18px] min-h-[18px] rounded-full flex items-center justify-center font-mono">
@@ -226,8 +231,8 @@ export default function Navbar() {
                               <img src={product.images[0]} alt={product.name} className="w-12 h-12 rounded-2xl object-cover shrink-0" />
                             )}
                             <div className="flex-1 min-w-0">
-                              <p className="font-serif font-bold text-ink-900 truncate">{product.name}</p>
-                              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">{product.category?.name}</p>
+                              <p className="font-serif font-bold text-ink-900 truncate">{pick(product.name, product.name_bn)}</p>
+                              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">{pick(product.category?.name, product.category?.name_bn)}</p>
                             </div>
                             <span className="font-mono font-bold text-sm text-ink-900 shrink-0">৳{minPrice.toLocaleString()}</span>
                           </Link>

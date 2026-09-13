@@ -13,3 +13,6 @@ dist/
 .vercel
 .playwright-mcp/
 .zcode/
+
+# local DB migration snapshots (db-migration-engineer backups)
+.db-snapshots/

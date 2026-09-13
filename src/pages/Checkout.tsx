@@ -5,9 +5,17 @@ import { useCart } from '../contexts/CartContext'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
 import { supabase } from '../lib/supabase'
-import { formatBDT, BD_DISTRICTS, getShippingCost, FREE_SHIPPING_THRESHOLD, PAYMENT_METHODS } from '../lib/constants'
+import { formatBDT, BD_DISTRICTS, getShippingCost, FREE_SHIPPING_THRESHOLD, PAYMENT_METHODS, districtName, divisionName } from '../lib/constants'
+import { useLanguage } from '../contexts/LanguageContext'
+
+const PAY_LABELS: Record<string, { nameKey: string; descKey: string }> = {
+  bkash: { nameKey: 'checkout.payBkash', descKey: 'checkout.payBkashDesc' },
+  card: { nameKey: 'checkout.payCard', descKey: 'checkout.payCardDesc' },
+  cod: { nameKey: 'checkout.payCod', descKey: 'checkout.payCodDesc' },
+}
 
 export default function Checkout() {
+  const { t, pick, lang } = useLanguage()
   const location = useLocation()
   const navigate = useNavigate()
   const { items, subtotal, clearCart } = useCart()
@@ -37,15 +45,22 @@ export default function Checkout() {
   const total = subtotal - discount + shippingCost
 
   const validateShipping = () => {
+    const fieldLabels: Record<string, string> = {
+      full_name: t('checkout.fullName'),
+      phone: t('checkout.phone'),
+      address_line1: t('checkout.addressLine1'),
+      city: t('checkout.city'),
+      district: t('checkout.district'),
+    }
     const required = ['full_name', 'phone', 'address_line1', 'city', 'district']
     for (const field of required) {
       if (!shippingInfo[field as keyof typeof shippingInfo].trim()) {
-        showToast(`Please fill in ${field.replace('_', ' ')}`, 'error')
+        showToast(t('checkout.fillIn', { field: fieldLabels[field] ?? field }), 'error')
         return false
       }
     }
     if (!session && !shippingInfo.email.trim()) {
-      showToast('Please enter your email', 'error')
+      showToast(t('checkout.emailRequired'), 'error')
       return false
     }
     return true
@@ -109,7 +124,7 @@ export default function Checkout() {
         })
 
         if (payError || payData?.error) {
-          showToast(payData?.error ?? 'Payment gateway error. Order placed with pending payment.', 'error')
+          showToast(payData?.error ?? t('checkout.gatewayError'), 'error')
           navigate(`/order-confirmation/${order.order_number}`)
           return
         }
@@ -121,12 +136,12 @@ export default function Checkout() {
         }
 
         // If no URL (gateway not configured), go to confirmation with pending payment
-        showToast('Payment gateway not configured. Order placed with pending payment.', 'info')
+        showToast(t('checkout.gatewayNotConfigured'), 'info')
       }
 
       navigate(`/order-confirmation/${order.order_number}`)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to place order. Please try again.'
+      const msg = err instanceof Error ? err.message : t('checkout.failedToPlace')
       showToast(msg, 'error')
     }
     setProcessing(false)
@@ -135,22 +150,22 @@ export default function Checkout() {
   if (items.length === 0) {
     return (
       <div className="section-padding py-20 text-center">
-        <h1 className="text-2xl font-serif text-ink-800 mb-4">Your cart is empty</h1>
-        <button onClick={() => navigate('/shop')} className="btn-primary">Start Shopping</button>
+        <h1 className="text-2xl font-serif text-ink-800 mb-4">{t('cart.empty')}</h1>
+        <button onClick={() => navigate('/shop')} className="btn-primary">{t('cart.startShopping')}</button>
       </div>
     )
   }
 
   return (
     <div className="section-padding py-8 animate-fade-in">
-      <h1 className="text-3xl font-serif text-ink-800 mb-8">Checkout</h1>
+      <h1 className="text-3xl font-serif text-ink-800 mb-8">{t('checkout.title')}</h1>
 
       {/* Steps */}
       <div className="flex items-center gap-2 mb-8 text-sm">
         {[
-          { key: 'shipping', label: 'Shipping' },
-          { key: 'payment', label: 'Payment' },
-          { key: 'review', label: 'Review' },
+          { key: 'shipping', label: t('checkout.shipping') },
+          { key: 'payment', label: t('checkout.payment') },
+          { key: 'review', label: t('checkout.review') },
         ].map((s, i) => (
           <div key={s.key} className="flex items-center gap-2">
             <div
@@ -173,10 +188,10 @@ export default function Checkout() {
           {/* Step 1: Shipping */}
           {step === 'shipping' && (
             <div className="card p-6 animate-fade-in">
-              <h2 className="text-xl font-serif text-ink-800 mb-4">Shipping Address</h2>
+              <h2 className="text-xl font-serif text-ink-800 mb-4">{t('checkout.shippingAddress')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-ink-600 mb-1.5 block">Full Name *</label>
+                  <label className="text-sm text-ink-600 mb-1.5 block">{t('checkout.fullName')} *</label>
                   <input
                     type="text"
                     value={shippingInfo.full_name}
@@ -186,7 +201,7 @@ export default function Checkout() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-ink-600 mb-1.5 block">Phone *</label>
+                  <label className="text-sm text-ink-600 mb-1.5 block">{t('checkout.phone')} *</label>
                   <input
                     type="tel"
                     value={shippingInfo.phone}
@@ -198,7 +213,7 @@ export default function Checkout() {
                 </div>
                 {!session && (
                   <div className="md:col-span-2">
-                    <label className="text-sm text-ink-600 mb-1.5 block">Email *</label>
+                    <label className="text-sm text-ink-600 mb-1.5 block">{t('checkout.email')} *</label>
                     <input
                       type="email"
                       value={shippingInfo.email}
@@ -209,28 +224,28 @@ export default function Checkout() {
                   </div>
                 )}
                 <div className="md:col-span-2">
-                  <label className="text-sm text-ink-600 mb-1.5 block">Address Line 1 *</label>
+                  <label className="text-sm text-ink-600 mb-1.5 block">{t('checkout.addressLine1')} *</label>
                   <input
                     type="text"
                     value={shippingInfo.address_line1}
                     onChange={(e) => setShippingInfo({ ...shippingInfo, address_line1: e.target.value })}
                     className="input-field"
-                    placeholder="House #, Road #"
+                    placeholder={t('checkout.addressPlaceholder')}
                     required
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="text-sm text-ink-600 mb-1.5 block">Address Line 2</label>
+                  <label className="text-sm text-ink-600 mb-1.5 block">{t('checkout.addressLine2')}</label>
                   <input
                     type="text"
                     value={shippingInfo.address_line2}
                     onChange={(e) => setShippingInfo({ ...shippingInfo, address_line2: e.target.value })}
                     className="input-field"
-                    placeholder="Apartment, suite, etc. (optional)"
+                    placeholder={t('checkout.address2Placeholder')}
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-ink-600 mb-1.5 block">City / Area *</label>
+                  <label className="text-sm text-ink-600 mb-1.5 block">{t('checkout.city')} *</label>
                   <input
                     type="text"
                     value={shippingInfo.city}
@@ -240,7 +255,7 @@ export default function Checkout() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-ink-600 mb-1.5 block">District *</label>
+                  <label className="text-sm text-ink-600 mb-1.5 block">{t('checkout.district')} *</label>
                   <select
                     value={shippingInfo.district}
                     onChange={(e) => {
@@ -254,12 +269,12 @@ export default function Checkout() {
                     className="input-field"
                   >
                     {BD_DISTRICTS.map((d) => (
-                      <option key={d.district} value={d.district}>{d.district}</option>
+                      <option key={d.district} value={d.district}>{districtName(d.district, lang)}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm text-ink-600 mb-1.5 block">Postal Code</label>
+                  <label className="text-sm text-ink-600 mb-1.5 block">{t('checkout.postalCode')}</label>
                   <input
                     type="text"
                     value={shippingInfo.postal_code}
@@ -268,21 +283,21 @@ export default function Checkout() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-ink-600 mb-1.5 block">Division</label>
+                  <label className="text-sm text-ink-600 mb-1.5 block">{t('checkout.division')}</label>
                   <input
                     type="text"
-                    value={shippingInfo.division}
+                    value={divisionName(shippingInfo.division, lang)}
                     disabled
                     className="input-field opacity-60"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="text-sm text-ink-600 mb-1.5 block">Order Notes (optional)</label>
+                  <label className="text-sm text-ink-600 mb-1.5 block">{t('checkout.orderNotes')}</label>
                   <textarea
                     value={shippingInfo.notes}
                     onChange={(e) => setShippingInfo({ ...shippingInfo, notes: e.target.value })}
                     className="input-field min-h-20 resize-none"
-                    placeholder="Delivery instructions, gift message, etc."
+                    placeholder={t('checkout.notesPlaceholder')}
                   />
                 </div>
               </div>
@@ -290,7 +305,7 @@ export default function Checkout() {
                 onClick={() => validateShipping() && setStep('payment')}
                 className="btn-primary w-full mt-6"
               >
-                Continue to Payment
+                {t('checkout.continueToPayment')}
               </button>
             </div>
           )}
@@ -298,7 +313,7 @@ export default function Checkout() {
           {/* Step 2: Payment */}
           {step === 'payment' && (
             <div className="card p-6 animate-fade-in">
-              <h2 className="text-xl font-serif text-ink-800 mb-4">Payment Method</h2>
+              <h2 className="text-xl font-serif text-ink-800 mb-4">{t('checkout.paymentMethod')}</h2>
               <div className="space-y-3">
                 {PAYMENT_METHODS.map((method) => (
                   <button
@@ -312,8 +327,8 @@ export default function Checkout() {
                   >
                     <span className="text-2xl">{method.icon}</span>
                     <div className="flex-1">
-                      <h4 className="font-medium text-ink-800">{method.name}</h4>
-                      <p className="text-sm text-ink-400">{method.description}</p>
+                      <h4 className="font-medium text-ink-800">{t(PAY_LABELS[method.id]?.nameKey ?? 'checkout.paymentMethod')}</h4>
+                      <p className="text-sm text-ink-400">{t(PAY_LABELS[method.id]?.descKey ?? '')}</p>
                     </div>
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
@@ -328,8 +343,8 @@ export default function Checkout() {
 
               {paymentMethod === 'cod' && (
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mt-4 text-sm text-amber-700">
-                  <p className="font-medium mb-1">Cash on Delivery</p>
-                  <p>Pay in cash when your order is delivered. A verification call may be made to confirm your order before dispatch.</p>
+                  <p className="font-medium mb-1">{t('checkout.payCod')}</p>
+                  <p>{t('checkout.payCodNote')}</p>
                 </div>
               )}
 
@@ -337,15 +352,15 @@ export default function Checkout() {
                 <div className="bg-ivory-100 rounded-2xl p-4 mt-4 text-sm text-ink-500 flex items-start gap-2">
                   <Lock size={16} className="text-ink-400 shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-medium text-ink-700">Secure Payment</p>
-                    <p className="mt-0.5">You will be redirected to {PAYMENT_METHODS.find(m => m.id === paymentMethod)?.name}'s secure payment page. Your payment is protected with bank-level encryption.</p>
+                    <p className="font-medium text-ink-700">{t('checkout.securePayment')}</p>
+                    <p className="mt-0.5">{t('checkout.securePaymentDesc', { name: t(PAY_LABELS[paymentMethod]?.nameKey ?? 'checkout.paymentMethod') })}</p>
                   </div>
                 </div>
               )}
 
               <div className="flex gap-3 mt-6">
-                <button onClick={() => setStep('shipping')} className="btn-outline flex-1">Back</button>
-                <button onClick={() => setStep('review')} className="btn-primary flex-1">Review Order</button>
+                <button onClick={() => setStep('shipping')} className="btn-outline flex-1">{t('common.back')}</button>
+                <button onClick={() => setStep('review')} className="btn-primary flex-1">{t('checkout.reviewOrder')}</button>
               </div>
             </div>
           )}
@@ -353,37 +368,37 @@ export default function Checkout() {
           {/* Step 3: Review */}
           {step === 'review' && (
             <div className="card p-6 animate-fade-in">
-              <h2 className="text-xl font-serif text-ink-800 mb-4">Review Your Order</h2>
+              <h2 className="text-xl font-serif text-ink-800 mb-4">{t('checkout.reviewYourOrder')}</h2>
 
               <div className="mb-6">
-                <h4 className="text-sm font-medium text-ink-700 mb-2">Shipping To</h4>
+                <h4 className="text-sm font-medium text-ink-700 mb-2">{t('checkout.shippingTo')}</h4>
                 <div className="text-sm text-ink-500 bg-ivory-100 rounded-2xl p-4">
                   <p className="font-medium text-ink-700">{shippingInfo.full_name}</p>
                   <p>{shippingInfo.address_line1}</p>
                   {shippingInfo.address_line2 && <p>{shippingInfo.address_line2}</p>}
-                  <p>{shippingInfo.city}, {shippingInfo.district}</p>
+                  <p>{shippingInfo.city}, {districtName(shippingInfo.district, lang)}</p>
                   <p>{shippingInfo.phone}</p>
                 </div>
               </div>
 
               <div className="mb-6">
-                <h4 className="text-sm font-medium text-ink-700 mb-2">Payment Method</h4>
+                <h4 className="text-sm font-medium text-ink-700 mb-2">{t('checkout.paymentMethod')}</h4>
                 <div className="text-sm text-ink-500 bg-ivory-100 rounded-2xl p-4 flex items-center gap-2">
                   <Shield size={16} className="text-ink-400" />
-                  {PAYMENT_METHODS.find((m) => m.id === paymentMethod)?.name}
-                  {paymentMethod === 'cod' && <span className="text-xs text-amber-600">(Verification required before dispatch)</span>}
+                  {t(PAY_LABELS[paymentMethod]?.nameKey ?? 'checkout.paymentMethod')}
+                  {paymentMethod === 'cod' && <span className="text-xs text-amber-600">{t('checkout.verificationNote')}</span>}
                 </div>
               </div>
 
               <div className="mb-6">
-                <h4 className="text-sm font-medium text-ink-700 mb-2">Items</h4>
+                <h4 className="text-sm font-medium text-ink-700 mb-2">{t('checkout.items')}</h4>
                 <div className="space-y-2">
                   {items.map((item) => {
                     const variant = 'variant' in item ? item.variant : undefined
                     return (
                       <div key={(item as { id?: string }).id ?? item.variant_id} className="flex justify-between text-sm">
                         <span className="text-ink-600">
-                          {variant?.product?.name ?? 'Product'} × {item.quantity}
+                          {pick(variant?.product?.name, variant?.product?.name_bn) || t('common.product')} × {item.quantity}
                           {variant?.size && ` (${variant.size})`}
                         </span>
                         <span className="text-ink-700 font-medium">
@@ -396,7 +411,7 @@ export default function Checkout() {
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setStep('payment')} className="btn-outline flex-1">Back</button>
+                <button onClick={() => setStep('payment')} className="btn-outline flex-1">{t('common.back')}</button>
                 <button
                   onClick={handlePlaceOrder}
                   disabled={processing}
@@ -405,10 +420,10 @@ export default function Checkout() {
                   {processing ? (
                     <>
                       <div className="w-5 h-5 border-2 border-ivory-50 border-t-transparent rounded-full animate-spin" />
-                      {paymentMethod === 'cod' ? 'Placing Order...' : 'Redirecting to payment...'}
+                      {paymentMethod === 'cod' ? t('checkout.placingOrder') : t('checkout.redirecting')}
                     </>
                   ) : (
-                    paymentMethod === 'cod' ? `Place Order · ${formatBDT(total)}` : `Pay ${formatBDT(total)}`
+                    paymentMethod === 'cod' ? t('checkout.placeOrderWith', { price: formatBDT(total) }) : t('checkout.payWith', { price: formatBDT(total) })
                   )}
                 </button>
               </div>
@@ -419,25 +434,25 @@ export default function Checkout() {
         {/* Summary */}
         <div className="lg:col-span-1">
           <div className="card p-6 sticky top-24">
-            <h2 className="text-lg font-serif text-ink-800 mb-4">Order Summary</h2>
+            <h2 className="text-lg font-serif text-ink-800 mb-4">{t('checkout.orderSummary')}</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-ink-600">
-                <span>Subtotal ({items.length} items)</span>
+                <span>{t('checkout.subtotalItems', { n: items.length })}</span>
                 <span>{formatBDT(subtotal)}</span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-green-600">
-                  <span>Discount</span>
+                  <span>{t('checkout.discount')}</span>
                   <span>-{formatBDT(discount)}</span>
                 </div>
               )}
               <div className="flex justify-between text-ink-600">
-                <span>Shipping</span>
-                <span>{shippingCost === 0 ? 'Free' : formatBDT(shippingCost)}</span>
+                <span>{t('cart.shipping')}</span>
+                <span>{shippingCost === 0 ? t('checkout.free') : formatBDT(shippingCost)}</span>
               </div>
             </div>
             <div className="flex justify-between text-lg font-semibold text-ink-800 border-t border-stone-200 pt-4 mt-4">
-              <span>Total</span>
+              <span>{t('cart.total')}</span>
               <span>{formatBDT(total)}</span>
             </div>
           </div>

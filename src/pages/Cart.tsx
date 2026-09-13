@@ -5,9 +5,11 @@ import { formatBDT, FREE_SHIPPING_THRESHOLD } from '../lib/constants'
 import { useState } from 'react'
 import { supabase, type Coupon } from '../lib/supabase'
 import { useToast } from '../contexts/ToastContext'
+import { useLanguage } from '../contexts/LanguageContext'
 
 export default function Cart() {
   const { items, subtotal, updateQuantity, removeFromCart, loading } = useCart()
+  const { t, pick } = useLanguage()
   const { showToast } = useToast()
   const [couponCode, setCouponCode] = useState('')
   const [discount, setDiscount] = useState(0)
@@ -28,17 +30,17 @@ export default function Cart() {
       .maybeSingle()
 
     if (error || !data) {
-      showToast('Invalid coupon code', 'error')
+      showToast(t('cart.invalidCoupon'), 'error')
       setDiscount(0)
       setCoupon(null)
     } else {
       const c = data as Coupon
       if (c.min_order_amount && subtotal < c.min_order_amount) {
-        showToast(`Minimum order of ${formatBDT(c.min_order_amount)} required`, 'error')
+        showToast(t('cart.minOrder', { price: formatBDT(c.min_order_amount) }), 'error')
         setDiscount(0)
         setCoupon(null)
       } else if (c.expires_at && new Date(c.expires_at) < new Date()) {
-        showToast('This coupon has expired', 'error')
+        showToast(t('cart.expiredCoupon'), 'error')
         setDiscount(0)
         setCoupon(null)
       } else {
@@ -50,7 +52,7 @@ export default function Cart() {
         }
         setDiscount(disc)
         setCoupon(c)
-        showToast(`Coupon applied! You saved ${formatBDT(disc)}`, 'success')
+        showToast(t('cart.couponApplied', { price: formatBDT(disc) }), 'success')
       }
     }
     setApplying(false)
@@ -70,16 +72,16 @@ export default function Cart() {
     return (
       <div className="section-padding py-20 text-center animate-fade-in">
         <ShoppingBag size={64} className="text-stone-300 mx-auto mb-6" />
-        <h1 className="text-2xl font-serif text-ink-800 mb-3">Your cart is empty</h1>
-        <p className="text-ink-400 mb-8">Looks like you haven't added anything yet.</p>
-        <Link to="/shop" className="btn-primary">Start Shopping</Link>
+        <h1 className="text-2xl font-serif text-ink-800 mb-3">{t('cart.empty')}</h1>
+        <p className="text-ink-400 mb-8">{t('cart.emptyHint')}</p>
+        <Link to="/shop" className="btn-primary">{t('cart.startShopping')}</Link>
       </div>
     )
   }
 
   return (
     <div className="section-padding py-8 animate-fade-in">
-      <h1 className="text-3xl font-serif text-ink-800 mb-8">Shopping Cart</h1>
+      <h1 className="text-3xl font-serif text-ink-800 mb-8">{t('cart.title')}</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
@@ -87,7 +89,7 @@ export default function Cart() {
           {remainingForFreeShipping > 0 ? (
             <div className="bg-mink-50 border border-mink-200 rounded-2xl p-4 mb-4">
               <p className="text-sm text-ink-600 flex items-center gap-2">
-                <Truck size={16} /> Add {formatBDT(remainingForFreeShipping)} more for free shipping!
+                <Truck size={16} /> {t('cart.addMoreForFree', { price: formatBDT(remainingForFreeShipping) })}
               </p>
               <div className="mt-2 h-2 bg-ivory-200 rounded-full overflow-hidden">
                 <div className="h-full bg-mink-400 rounded-full transition-all duration-500" style={{ width: `${freeShippingProgress}%` }} />
@@ -96,7 +98,7 @@ export default function Cart() {
           ) : (
             <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4">
               <p className="text-sm text-green-700 flex items-center gap-2">
-                <Truck size={16} /> You've unlocked free shipping!
+                <Truck size={16} /> {t('cart.freeShippingUnlocked')}
               </p>
             </div>
           )}
@@ -114,12 +116,12 @@ export default function Cart() {
                 </Link>
                 <div className="flex-1 min-w-0">
                   <Link to={`/product/${product?.slug ?? ''}`}>
-                    <h3 className="font-serif text-ink-800 hover:text-mink-500 transition-colors line-clamp-1">{product?.name ?? ''}</h3>
+                    <h3 className="font-serif text-ink-800 hover:text-mink-500 transition-colors line-clamp-1">{pick(product?.name, product?.name_bn)}</h3>
                   </Link>
                   <p className="text-sm text-ink-400 mt-0.5">
-                    {variant.size && `Size: ${variant.size}`}
+                    {variant.size && t('cart.sizeLabel', { v: variant.size })}
                     {variant.size && variant.color && ' · '}
-                    {variant.color && `Color: ${variant.color}`}
+                    {variant.color && t('cart.colorLabel', { v: variant.color })}
                   </p>
                   <p className="text-ink-700 font-semibold mt-1">{formatBDT(variant.price)}</p>
 
@@ -142,7 +144,7 @@ export default function Cart() {
                     <button
                       onClick={() => removeFromCart(item.variant_id)}
                       className="text-ink-400 hover:text-red-500 transition-colors"
-                      aria-label="Remove item"
+                      aria-label={t('cart.removeItem')}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -156,7 +158,7 @@ export default function Cart() {
         {/* Order Summary */}
         <div className="lg:col-span-1">
           <div className="card p-6 sticky top-24">
-            <h2 className="text-xl font-serif text-ink-800 mb-4">Order Summary</h2>
+            <h2 className="text-xl font-serif text-ink-800 mb-4">{t('cart.orderSummary')}</h2>
 
             {/* Coupon */}
             <div className="mb-4">
@@ -167,7 +169,7 @@ export default function Cart() {
                     type="text"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
-                    placeholder="Coupon code"
+                    placeholder={t('cart.couponPlaceholder')}
                     className="w-full pl-9 pr-3 py-2.5 rounded-2xl border border-stone-300 text-sm focus:outline-none focus:ring-2 focus:ring-mink-300"
                   />
                 </div>
@@ -176,33 +178,33 @@ export default function Cart() {
                   disabled={applying}
                   className="px-4 py-2.5 rounded-2xl bg-ink-700 text-ivory-50 text-sm font-medium hover:bg-ink-800 transition-colors disabled:opacity-50"
                 >
-                  Apply
+                  {t('common.apply')}
                 </button>
               </div>
               {coupon && (
-                <p className="text-xs text-green-600 mt-1.5">Coupon "{coupon.code}" applied</p>
+                <p className="text-xs text-green-600 mt-1.5">{t('cart.couponAppliedLabel', { code: coupon.code })}</p>
               )}
             </div>
 
             <div className="space-y-2 text-sm border-t border-stone-200 pt-4">
               <div className="flex justify-between text-ink-600">
-                <span>Subtotal</span>
+                <span>{t('cart.subtotal')}</span>
                 <span>{formatBDT(subtotal)}</span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-green-600">
-                  <span>Discount</span>
+                  <span>{t('cart.discount')}</span>
                   <span>-{formatBDT(discount)}</span>
                 </div>
               )}
               <div className="flex justify-between text-ink-600">
-                <span>Shipping</span>
-                <span className="text-ink-400">Calculated at checkout</span>
+                <span>{t('cart.shipping')}</span>
+                <span className="text-ink-400">{t('cart.calculatedAtCheckout')}</span>
               </div>
             </div>
 
             <div className="flex justify-between text-lg font-semibold text-ink-800 border-t border-stone-200 pt-4 mt-4">
-              <span>Total</span>
+              <span>{t('cart.total')}</span>
               <span>{formatBDT(total)}</span>
             </div>
 
@@ -211,11 +213,11 @@ export default function Cart() {
               state={{ discount, couponCode: coupon?.code ?? null }}
               className="btn-primary w-full mt-6 text-center flex items-center justify-center gap-2"
             >
-              Proceed to Checkout <ShoppingBag size={18} />
+              {t('cart.proceedCheckout')} <ShoppingBag size={18} />
             </Link>
 
             <Link to="/shop" className="block text-center text-sm text-ink-500 hover:text-mink-500 mt-3">
-              Continue Shopping
+              {t('cart.continueShopping')}
             </Link>
           </div>
         </div>
