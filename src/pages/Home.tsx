@@ -85,11 +85,13 @@ export default function Home() {
     : 0
 
   // Hero + story imagery: admin campaign images first, else real product photos
-  const heroImage = settings?.hero_image_url ?? heroTagProduct?.images?.[0] ?? null
-  const heroMobileImage = settings?.hero_mobile_image_url ?? settings?.hero_image_url ?? heroImage
-  const storyImage =
+  // (|| rather than ?? so a cleared admin field also falls back to products)
+  const heroImage = settings?.hero_image_url || heroTagProduct?.images?.[0] || null
+  const heroMobileImage = settings?.hero_mobile_image_url || settings?.hero_image_url || heroImage
+  const storyFallback =
     (featured.find((p) => p.slug !== heroTagProduct?.slug) ??
       newArrivals.find((p) => p.slug !== heroTagProduct?.slug))?.images?.[0] ?? null
+  const storyImage = settings?.story_image_url || storyFallback
   const banner = banners[bannerIndex]
 
   const testimonials = [

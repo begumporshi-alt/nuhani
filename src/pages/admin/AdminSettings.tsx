@@ -4,6 +4,66 @@ import { supabase, supabaseUrl, type SiteSettings } from '../../lib/supabase'
 import { useToast } from '../../contexts/ToastContext'
 import AdminBackLink from '../../components/AdminBackLink'
 
+/** One D-card image control: preview, upload, paste-URL, and revert-to-product-photo. */
+function AdminImageField({
+  label,
+  hint,
+  value,
+  previewClass,
+  uploading,
+  onFile,
+  onUrl,
+  onReset,
+}: {
+  label: string
+  hint?: string
+  value: string | null
+  previewClass: string
+  uploading: boolean
+  onFile: (file: File) => void
+  onUrl: (url: string) => void
+  onReset: () => void
+}) {
+  return (
+    <div>
+      <label className="text-sm text-ink-600 mb-1.5 block">{label}</label>
+      <div className="flex items-start gap-4">
+        <div className={`${previewClass} rounded-2xl bg-ivory-100 overflow-hidden shrink-0`}>
+          {value ? (
+            <img src={value} alt={label} className="w-full h-full object-cover" />
+          ) : (
+            <div className="flex items-center justify-center h-full text-center px-2"><span className="text-ink-300 text-xs">Uses product photo</span></div>
+          )}
+        </div>
+        <div className="flex-1 space-y-2">
+          <div className="flex flex-wrap gap-2">
+            <label className="btn-secondary flex items-center gap-2 cursor-pointer">
+              <Upload size={16} /> {uploading ? 'Uploading...' : 'Upload'}
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
+            </label>
+            <button
+              type="button"
+              onClick={onReset}
+              className="btn-secondary whitespace-nowrap shrink-0"
+              title="Clear this image so the card falls back to a real product photo"
+            >
+              Use product photo
+            </button>
+          </div>
+          <input
+            type="text"
+            value={value ?? ''}
+            onChange={(e) => onUrl(e.target.value)}
+            className="input-field"
+            placeholder="Or paste an image URL / path (https://...)"
+          />
+        </div>
+      </div>
+      {hint && <p className="text-xs text-ink-400 mt-2">{hint}</p>}
+    </div>
+  )
+}
+
 export default function AdminSettings() {
   const { showToast } = useToast()
   const [settings, setSettings] = useState<SiteSettings | null>(null)
@@ -12,6 +72,7 @@ export default function AdminSettings() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingHero, setUploadingHero] = useState(false)
   const [uploadingHeroMobile, setUploadingHeroMobile] = useState(false)
+  const [uploadingStory, setUploadingStory] = useState(false)
   const [connectingTelegram, setConnectingTelegram] = useState(false)
   const [telegramConnected, setTelegramConnected] = useState(false)
 
@@ -28,7 +89,7 @@ export default function AdminSettings() {
     if (!settings) return
     setSaving(true)
     const { error } = await supabase.from('site_settings').update({
-      logo_url: settings.logo_url,
+      logo_url: settings.logo_url || null,
       site_name: settings.site_name,
       phone: settings.phone,
       email: settings.email,
@@ -37,8 +98,9 @@ export default function AdminSettings() {
       facebook_url: settings.facebook_url,
       youtube_url: settings.youtube_url,
       twitter_url: settings.twitter_url,
-      hero_image_url: settings.hero_image_url,
-      hero_mobile_image_url: settings.hero_mobile_image_url,
+      hero_image_url: settings.hero_image_url || null,
+      hero_mobile_image_url: settings.hero_mobile_image_url || null,
+      story_image_url: settings.story_image_url || null,
       pathao_api_key: settings.pathao_api_key,
       steadfast_api_key: settings.steadfast_api_key,
       courier_provider: settings.courier_provider,
@@ -81,7 +143,7 @@ export default function AdminSettings() {
     setConnectingTelegram(false)
   }
 
-  const handleImageUpload = async (file: File, field: 'logo_url' | 'hero_image_url' | 'hero_mobile_image_url', setUploading: (v: boolean) => void) => {
+  const handleImageUpload = async (file: File, field: 'logo_url' | 'hero_image_url' | 'hero_mobile_image_url' | 'story_image_url', setUploading: (v: boolean) => void) => {
     if (!file.type.startsWith('image/')) {
       showToast(`${file.name} is not an image`, 'error')
       return
@@ -162,43 +224,41 @@ export default function AdminSettings() {
         </div>
       </div>
 
-      {/* Hero Images */}
+      {/* D-Card Images (Hero + Story) */}
       <div className="card p-6 mb-6">
-        <h2 className="text-lg font-serif text-ink-800 mb-4">Homepage Hero Images</h2>
+        <h2 className="text-lg font-serif text-ink-800 mb-4">Hero &amp; Story D-Card Images</h2>
         <div className="space-y-6">
-          <div>
-            <label className="text-sm text-ink-600 mb-1.5 block">Desktop Hero Image (recommended 1920x800px)</label>
-            <div className="flex items-center gap-4">
-              <div className="w-40 h-24 rounded-2xl bg-ivory-100 overflow-hidden shrink-0">
-                {settings.hero_image_url ? (
-                  <img src={settings.hero_image_url} alt="Desktop Hero" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="flex items-center justify-center h-full"><span className="text-ink-300 text-xs">No image</span></div>
-                )}
-              </div>
-              <label className="btn-secondary flex items-center gap-2 cursor-pointer">
-                <Upload size={16} /> {uploadingHero ? 'Uploading...' : 'Upload Desktop'}
-                <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], 'hero_image_url', setUploadingHero)} />
-              </label>
-            </div>
-          </div>
-          <div>
-            <label className="text-sm text-ink-600 mb-1.5 block">Mobile Hero Image (recommended 800x1000px)</label>
-            <div className="flex items-center gap-4">
-              <div className="w-24 h-32 rounded-2xl bg-ivory-100 overflow-hidden shrink-0">
-                {settings.hero_mobile_image_url ? (
-                  <img src={settings.hero_mobile_image_url} alt="Mobile Hero" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="flex items-center justify-center h-full"><span className="text-ink-300 text-xs">No image</span></div>
-                )}
-              </div>
-              <label className="btn-secondary flex items-center gap-2 cursor-pointer">
-                <Upload size={16} /> {uploadingHeroMobile ? 'Uploading...' : 'Upload Mobile'}
-                <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], 'hero_mobile_image_url', setUploadingHeroMobile)} />
-              </label>
-            </div>
-            <p className="text-xs text-ink-400 mt-2">If no mobile image is set, the desktop image will be used on mobile.</p>
-          </div>
+          <AdminImageField
+            label="Hero D-Card — Desktop (recommended portrait ~800×1000px)"
+            value={settings.hero_image_url}
+            previewClass="w-24 h-32"
+            uploading={uploadingHero}
+            onFile={(f) => handleImageUpload(f, 'hero_image_url', setUploadingHero)}
+            onUrl={(url) => setSettings({ ...settings, hero_image_url: url })}
+            onReset={() => setSettings({ ...settings, hero_image_url: '' })}
+            hint="The tall D-shaped photo frame beside the hero text at the top of the homepage."
+          />
+          <AdminImageField
+            label="Hero D-Card — Mobile (recommended portrait ~800×940px)"
+            value={settings.hero_mobile_image_url}
+            previewClass="w-20 h-28"
+            uploading={uploadingHeroMobile}
+            onFile={(f) => handleImageUpload(f, 'hero_mobile_image_url', setUploadingHeroMobile)}
+            onUrl={(url) => setSettings({ ...settings, hero_mobile_image_url: url })}
+            onReset={() => setSettings({ ...settings, hero_mobile_image_url: '' })}
+            hint="If empty, the desktop image is used on mobile."
+          />
+          <AdminImageField
+            label="Story D-Card — above footer (recommended portrait ~800×940px)"
+            value={settings.story_image_url}
+            previewClass="w-24 h-32"
+            uploading={uploadingStory}
+            onFile={(f) => handleImageUpload(f, 'story_image_url', setUploadingStory)}
+            onUrl={(url) => setSettings({ ...settings, story_image_url: url })}
+            onReset={() => setSettings({ ...settings, story_image_url: '' })}
+            hint="The tilted D-shaped photo in the 'Built for every season' section above the footer."
+          />
+          <p className="text-xs text-ink-400">Leave any of these empty to show a real product photo instead. Remember to click Save Settings below.</p>
         </div>
       </div>
 
