@@ -121,12 +121,12 @@ export default function Navbar() {
                 </span>
               ) : (
                 <div className="relative flex items-center gap-2.5">
-                  <div className="relative h-10 w-auto min-w-[60px] flex items-center">
-                    {!logoLoaded && <div className="logo-skeleton absolute inset-0 min-w-[60px]" />}
+                  <div className="relative h-14 w-auto min-w-[72px] flex items-center">
+                    {!logoLoaded && <div className="logo-skeleton absolute inset-0 min-w-[72px]" />}
                     <img
                       src={logoUrl}
                       alt={siteName}
-                      className={`h-10 w-auto transition-opacity duration-500 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                      className={`h-14 w-auto transition-opacity duration-500 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
                       onLoad={() => setLogoLoaded(true)}
                       onError={() => setLogoError(true)}
                     />

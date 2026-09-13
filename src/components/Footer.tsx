@@ -39,7 +39,8 @@ export default function Footer() {
               <span className="brand-title-light text-2xl block mb-4">{siteName}<span className="text-champagne-500">.</span></span>
             ) : (
               <div className="h-12 w-auto min-w-[40px] mb-4">
-                <img src={logoUrl} alt={siteName} className="h-12 w-auto" onError={() => setLogoError(true)} />
+                {/* dark footer -> whiten the ink linework (white logo on dark bg rule) */}
+                <img src={logoUrl} alt={siteName} className="h-12 w-auto brightness-0 invert" onError={() => setLogoError(true)} />
               </div>
             )}
             <p className="font-serif italic text-xl text-ivory-100/85 max-w-[22ch] leading-snug mb-5">
