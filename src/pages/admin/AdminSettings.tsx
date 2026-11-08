@@ -73,6 +73,7 @@ export default function AdminSettings() {
   const [uploadingHero, setUploadingHero] = useState(false)
   const [uploadingHeroMobile, setUploadingHeroMobile] = useState(false)
   const [uploadingStory, setUploadingStory] = useState(false)
+  const [uploadingAboutHero, setUploadingAboutHero] = useState(false)
   const [connectingTelegram, setConnectingTelegram] = useState(false)
   const [telegramConnected, setTelegramConnected] = useState(false)
 
@@ -101,6 +102,7 @@ export default function AdminSettings() {
       hero_image_url: settings.hero_image_url || null,
       hero_mobile_image_url: settings.hero_mobile_image_url || null,
       story_image_url: settings.story_image_url || null,
+      about_hero_image_url: settings.about_hero_image_url || null,
       pathao_api_key: settings.pathao_api_key,
       steadfast_api_key: settings.steadfast_api_key,
       courier_provider: settings.courier_provider,
@@ -143,7 +145,7 @@ export default function AdminSettings() {
     setConnectingTelegram(false)
   }
 
-  const handleImageUpload = async (file: File, field: 'logo_url' | 'hero_image_url' | 'hero_mobile_image_url' | 'story_image_url', setUploading: (v: boolean) => void) => {
+  const handleImageUpload = async (file: File, field: 'logo_url' | 'hero_image_url' | 'hero_mobile_image_url' | 'story_image_url' | 'about_hero_image_url', setUploading: (v: boolean) => void) => {
     if (!file.type.startsWith('image/')) {
       showToast(`${file.name} is not an image`, 'error')
       return
@@ -259,6 +261,23 @@ export default function AdminSettings() {
             hint="The tilted D-shaped photo in the 'Built for every season' section above the footer."
           />
           <p className="text-xs text-ink-400">Leave any of these empty to show a real product photo instead. Remember to click Save Settings below.</p>
+        </div>
+      </div>
+
+      {/* About Page Hero */}
+      <div className="card p-6 mb-6">
+        <h2 className="text-lg font-serif text-ink-800 mb-4">About Page Hero Image</h2>
+        <div className="space-y-6">
+          <AdminImageField
+            label="About hero banner (recommended wide landscape ~1600×700px)"
+            value={settings.about_hero_image_url}
+            previewClass="w-32 h-20"
+            uploading={uploadingAboutHero}
+            onFile={(f) => handleImageUpload(f, 'about_hero_image_url', setUploadingAboutHero)}
+            onUrl={(url) => setSettings({ ...settings, about_hero_image_url: url })}
+            onReset={() => setSettings({ ...settings, about_hero_image_url: '' })}
+            hint="The wide banner at the top of the About page. If empty, a brand-matched bundled image is shown."
+          />
         </div>
       </div>
 

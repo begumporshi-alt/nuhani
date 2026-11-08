@@ -4,6 +4,10 @@ import { Link } from 'react-router-dom'
 import { fetchPublicSettings, type PublicSettings } from '../lib/supabase'
 import Seo from '../components/Seo'
 
+// Brand-verified fallback for the About hero (2026-11-09: modest hijab subject,
+// warm sun-orange paddy field, wide-crop safe). Used when the admin field is empty.
+const ABOUT_HERO_FALLBACK = 'https://images.pexels.com/photos/789555/pexels-photo-789555.jpeg?auto=compress&cs=tinysrgb&w=1600'
+
 export default function About() {
   const [settings, setSettings] = useState<PublicSettings | null>(null)
 
@@ -14,6 +18,7 @@ export default function About() {
   const phone = settings?.phone ?? '+880 1700 000000'
   const email = settings?.email ?? 'hello@nuhani.com'
   const address = settings?.address ?? 'Dhaka, Bangladesh'
+  const aboutHeroImage = settings?.about_hero_image_url || ABOUT_HERO_FALLBACK
 
   return (
     <div className="animate-fade-in">
@@ -25,9 +30,9 @@ export default function About() {
       {/* Hero */}
       <section className="relative h-[40vh] min-h-[300px] overflow-hidden">
         <img
-          src="https://i.ibb.co.com/0VmkNg30/foraboutus.png"
+          src={aboutHeroImage}
           alt="Our Story"
-          className="w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-ink-900/70 to-ink-800/30" />
         <div className="relative h-full flex items-center section-padding">

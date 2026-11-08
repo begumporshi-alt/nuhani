@@ -30,6 +30,7 @@ export type PublicSettings = {
   hero_image_url: string | null
   hero_mobile_image_url: string | null
   story_image_url: string | null
+  about_hero_image_url: string | null
   whatsapp_number: string | null
   telegram_bot_username: string | null
   courier_provider: string | null
@@ -243,6 +244,7 @@ export type SiteSettings = {
   hero_image_url: string | null
   hero_mobile_image_url: string | null
   story_image_url: string | null
+  about_hero_image_url: string | null
   pathao_api_key: string | null
   steadfast_api_key: string | null
   courier_provider: string | null
