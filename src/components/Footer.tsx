@@ -74,7 +74,7 @@ export default function Footer() {
           <div>
             <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-mink-400 mb-4">{t('footer.shop')}</h3>
             <ul className="space-y-2.5 text-sm">
-              {categories.slice(0, 3).map((c) => (
+              {categories.slice(0, 5).map((c) => (
                 <li key={c.id}>
                   <Link to={`/shop/${c.slug}`} className="text-ivory-100/70 hover:text-champagne-500 transition-colors">{pick(c.name, c.name_bn)}</Link>
                 </li>

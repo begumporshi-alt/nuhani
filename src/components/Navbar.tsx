@@ -93,7 +93,7 @@ export default function Navbar() {
 
   const navLinks = [
     { label: t('nav.shopAll'), path: '/shop' },
-    ...categories.slice(0, 3).map((c) => ({ label: pick(c.name, c.name_bn), path: `/shop/${c.slug}` })),
+    ...categories.slice(0, 5).map((c) => ({ label: pick(c.name, c.name_bn), path: `/shop/${c.slug}` })),
     { label: t('nav.about'), path: '/about' },
     { label: t('nav.contact'), path: '/contact' },
   ]
