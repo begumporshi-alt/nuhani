@@ -105,10 +105,9 @@ export default function Checkout() {
       // after the payment-gateway redirect (orders are not publicly readable).
       sessionStorage.setItem('nuhani_order_phone', shippingInfo.phone)
 
-      // Send Telegram order notification to admin
-      supabase.functions.invoke('telegram-bot', {
-        body: JSON.stringify({ action: 'notify_order', order_id: order.id }),
-      }).catch(() => { /* non-blocking — notification failure should not break checkout */ })
+      // Telegram "New Order Received" notification is now sent by a DB trigger
+      // (reliable — fires on order insert inside PostgreSQL, no browser dependency).
+      // See supabase/migrations/20261121000000_reliable_telegram_order_notify.sql
 
       await clearCart()
 
