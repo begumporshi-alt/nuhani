@@ -305,7 +305,7 @@ export default function OrderConfirmation() {
 
       {telegramBot && (
         <a
-          href={`https://t.me/${telegramBot}`}
+          href={`https://t.me/${telegramBot}?start=${order.order_number}`}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-6 flex items-center justify-center gap-2 w-full py-3 rounded-full bg-[#229ED9] text-white text-sm font-medium hover:bg-[#1d8ec2] transition-colors"
