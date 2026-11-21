@@ -106,6 +106,8 @@ type Translations = {
     outOfStock: string
     lowStock: string
     selectSize: string
+    selectColor: string
+    defaultColor: string
     quantity: string
     sizeGuide: string
     reviews: string
@@ -293,6 +295,7 @@ type Translations = {
     details: string
     qty: string
     sizeLabel: string
+    colorLabel: string
     paid: string
     failed: string
     pending: string
@@ -456,7 +459,7 @@ const en: Translations = {
   },
   product: {
     addToCart: 'Add to Cart', buyNow: 'Buy Now', outOfStock: 'Out of Stock', lowStock: 'Only {n} left in stock!',
-    selectSize: 'Select Size', quantity: 'Quantity', sizeGuide: 'Size Guide', reviews: 'Customer Reviews',
+    selectSize: 'Select Size', selectColor: 'Select Color', defaultColor: 'Default', quantity: 'Quantity', sizeGuide: 'Size Guide', reviews: 'Customer Reviews',
     writeReview: 'Write a Review', description: 'Description', relatedProducts: 'You May Also Like',
     sale: 'Sale',
     badgeFeatured: 'Featured',
@@ -625,6 +628,7 @@ const en: Translations = {
     details: 'Order Details',
     qty: 'Qty: {n}',
     sizeLabel: 'Size: {v}',
+    colorLabel: 'Color: {v}',
     paid: 'Paid',
     failed: 'Failed',
     pending: 'Pending',
@@ -775,7 +779,7 @@ const bn: Translations = {
   },
   product: {
     addToCart: 'কার্টে যোগ করুন', buyNow: 'এখনই কিনুন', outOfStock: 'স্টকে নেই', lowStock: 'মাত্র {n}টি বাকি!',
-    selectSize: 'সাইজ নির্বাচন করুন', quantity: 'পরিমাণ', sizeGuide: 'সাইজ গাইড', reviews: 'কাস্টমার রিভিউ',
+    selectSize: 'সাইজ নির্বাচন করুন', selectColor: 'রং নির্বাচন করুন', defaultColor: 'ডিফল্ট', quantity: 'পরিমাণ', sizeGuide: 'সাইজ গাইড', reviews: 'কাস্টমার রিভিউ',
     writeReview: 'রিভিউ লিখুন', description: 'বিবরণ', relatedProducts: 'আপনার পছন্দ হতে পারে',
     sale: 'সেল',
     badgeFeatured: 'ফিচার্ড',
@@ -943,6 +947,7 @@ const bn: Translations = {
     details: 'অর্ডারের বিবরণ',
     qty: 'পরিমাণ: {n}',
     sizeLabel: 'সাইজ: {v}',
+    colorLabel: 'রং: {v}',
     paid: 'পরিশোধিত',
     failed: 'ব্যর্থ',
     pending: 'বাকি',

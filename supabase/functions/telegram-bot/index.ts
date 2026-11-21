@@ -35,7 +35,7 @@ async function getSettings(supabase: ReturnType<typeof createClient>) {
   return data;
 }
 
-function formatOrderMessage(order: OrderRow, items: { product_name: string; quantity: number; total_price: number }[]): string {
+function formatOrderMessage(order: OrderRow, items: { product_name: string; quantity: number; total_price: number; variant_details?: Record<string, unknown> | null }[]): string {
   const addr = order.shipping_address ?? {};
   const lines: string[] = [
     "🛍️ *New Order Received!*",
@@ -47,7 +47,14 @@ function formatOrderMessage(order: OrderRow, items: { product_name: string; quan
     `*Total:* ৳${order.total_amount ?? 0}`,
     "",
     "*Items:*",
-    ...items.map((it) => `  • ${it.product_name} x${it.quantity} — ৳${it.total_price}`),
+    // Variant size/color are snapshotted into order_items.variant_details at
+    // order time — show them so the seller knows exactly which one was bought.
+    ...items.map((it) => {
+      const size = typeof it.variant_details?.size === "string" ? it.variant_details.size.trim() : "";
+      const color = typeof it.variant_details?.color === "string" ? it.variant_details.color.trim() : "";
+      const variantLabel = [size, color].filter(Boolean).join(" · ");
+      return `  • ${it.product_name}${variantLabel ? ` (${variantLabel})` : ""} x${it.quantity} — ৳${it.total_price}`;
+    }),
     "",
     `*Address:* ${addr.address_line1 ?? ""}, ${addr.city ?? ""}, ${addr.district ?? ""}`,
     `*Time:* ${new Date(order.created_at).toLocaleString("en-GB", { timeZone: "Asia/Dhaka" })}`,
@@ -278,7 +285,7 @@ Deno.serve(async (req: Request) => {
 
       const { data: items } = await supabase
         .from("order_items")
-        .select("product_name, quantity, total_price")
+        .select("product_name, quantity, total_price, variant_details")
         .eq("order_id", orderId);
 
       const message = formatOrderMessage(order, items ?? []);

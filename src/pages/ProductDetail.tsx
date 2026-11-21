@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Heart, ShoppingBag, Truck, RefreshCw, Shield, Minus, Plus, Star, ChevronRight, X, Share2, Link2, Facebook, MessageCircle, Copy, Play } from 'lucide-react'
 import { supabase, type Product, type Review } from '../lib/supabase'
+
+// Normalize a color/size label for grouping: trim whitespace, lowercase color
+// keys so 'Black'/'black ' merge into one selectable group.
+const colorKeyOf = (c: string | null | undefined) => c?.trim().toLowerCase() ?? ''
+const sizeKeyOf = (s: string | null | undefined) => s?.trim() ?? null
 import { formatBDT } from '../lib/constants'
 import { useCart } from '../contexts/CartContext'
 import { useToast } from '../contexts/ToastContext'
@@ -21,7 +26,8 @@ export default function ProductDetail() {
   const [related, setRelated] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
-  const [selectedVariant, setSelectedVariant] = useState<string | null>(null)
+  const [selectedColor, setSelectedColor] = useState('')
+  const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [showSizeGuide, setShowSizeGuide] = useState(false)
   const [adding, setAdding] = useState(false)
@@ -46,7 +52,14 @@ export default function ProductDetail() {
       if (data) {
         const prod = data as Product
         setProduct(prod)
-        if (prod.variants?.length) setSelectedVariant(prod.variants[0].id)
+        if (prod.variants?.length) {
+          const first = prod.variants[0]
+          setSelectedColor(colorKeyOf(first.color))
+          setSelectedSize(first.size?.trim() ?? null)
+        } else {
+          setSelectedColor('')
+          setSelectedSize(null)
+        }
 
         const { data: reviewData } = await supabase
           .from('reviews')
@@ -83,21 +96,79 @@ export default function ProductDetail() {
     load()
   }, [slug, session])
 
-  const variant = product?.variants?.find((v) => v.id === selectedVariant)
+  const variants = product?.variants ?? []
+
+  // Distinct color groups across the product's variants. Keys are lowercase-
+  // trimmed color names; the '' key is the group of variants with no color
+  // entered (labeled neutrally so it stays reachable). A group is in stock if
+  // any of its variants has stock.
+  const colorOptions = (() => {
+    const groups = new Map<string, { key: string; label: string; inStock: boolean }>()
+    for (const v of variants) {
+      const key = colorKeyOf(v.color)
+      const label = v.color?.trim() || t('product.defaultColor')
+      const g = groups.get(key)
+      if (g) { if (v.stock_quantity > 0) g.inStock = true }
+      else groups.set(key, { key, label, inStock: v.stock_quantity > 0 })
+    }
+    return [...groups.values()]
+  })()
+
+  // Size buttons show the selected color's sizes when the product has more
+  // than one color group; otherwise every size the product has.
+  const sizeOptions = (() => {
+    const pool = colorOptions.length > 1
+      ? variants.filter((v) => colorKeyOf(v.color) === selectedColor)
+      : variants
+    const groups = new Map<string | null, { key: string | null; label: string; inStock: boolean }>()
+    for (const v of pool) {
+      const key = sizeKeyOf(v.size)
+      const label = v.size?.trim() || t('product.oneSize')
+      const g = groups.get(key)
+      if (g) { if (v.stock_quantity > 0) g.inStock = true }
+      else groups.set(key, { key, label, inStock: v.stock_quantity > 0 })
+    }
+    return [...groups.values()]
+  })()
+
+  // The exact variant matching the selected color+size combination.
+  const variant = variants.find((v) =>
+    colorKeyOf(v.color) === selectedColor && sizeKeyOf(v.size) === selectedSize
+  )
   const isOutOfStock = variant ? variant.stock_quantity === 0 : true
   const isLowStock = variant ? variant.stock_quantity > 0 && variant.stock_quantity <= 5 : false
 
+  // Picking a color keeps the current size when it exists in that color,
+  // otherwise jumps to the new color's first size.
+  const handleSelectColor = (key: string) => {
+    setSelectedColor(key)
+    if (!variants.some((v) => colorKeyOf(v.color) === key && sizeKeyOf(v.size) === selectedSize)) {
+      const first = variants.find((v) => colorKeyOf(v.color) === key)
+      setSelectedSize(first ? sizeKeyOf(first.size) : null)
+    }
+  }
+
+  // Picking a size keeps the current color when it offers that size,
+  // otherwise jumps to the first color that does.
+  const handleSelectSize = (key: string | null) => {
+    setSelectedSize(key)
+    if (!variants.some((v) => colorKeyOf(v.color) === selectedColor && sizeKeyOf(v.size) === key)) {
+      const first = variants.find((v) => sizeKeyOf(v.size) === key)
+      if (first) setSelectedColor(colorKeyOf(first.color))
+    }
+  }
+
   const handleAddToCart = async () => {
-    if (!selectedVariant) { showToast(t('product.selectSizeFirst'), 'error'); return }
+    if (!variant) { showToast(t('product.selectSizeFirst'), 'error'); return }
     setAdding(true)
-    await addToCart(selectedVariant, quantity)
+    await addToCart(variant.id, quantity)
     showToast(t('common.addedToCart'), 'success')
     setAdding(false)
   }
 
   const handleBuyNow = async () => {
-    if (!selectedVariant) { showToast(t('product.selectSizeFirst'), 'error'); return }
-    await addToCart(selectedVariant, quantity)
+    if (!variant) { showToast(t('product.selectSizeFirst'), 'error'); return }
+    await addToCart(variant.id, quantity)
     window.location.href = '/cart'
   }
 
@@ -300,22 +371,41 @@ export default function ProductDetail() {
 
           {product.description && <p className="text-ink-600 leading-relaxed mb-6">{(lang === 'bn' && product.description_bn) ? product.description_bn : product.description}</p>}
 
+          {/* Color Selector — only when the product has more than one color group */}
+          {colorOptions.length > 1 && (
+            <div className="mb-6">
+              <h4 className="font-medium text-ink-800 mb-3">{t('product.selectColor')}</h4>
+              <div className="flex flex-wrap gap-3">
+                {colorOptions.map((c) => (
+                  <button key={c.key || 'default'} onClick={() => handleSelectColor(c.key)} disabled={!c.inStock}
+                    className={`min-w-[3rem] px-4 py-2.5 rounded-full border text-sm font-medium transition-all ${
+                      selectedColor === c.key ? 'border-ink-700 bg-ink-700 text-ivory-50'
+                      : !c.inStock ? 'border-stone-200 text-stone-300 cursor-not-allowed line-through'
+                      : 'border-stone-300 text-ink-700 hover:border-mink-300'
+                    }`}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Size Selector */}
-          {product.variants && product.variants.length > 0 && (
+          {variants.length > 0 && (
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="font-medium text-ink-800">{t('product.selectSize')}</h4>
                 <button onClick={() => setShowSizeGuide(true)} className="text-sm text-mink-500 hover:text-mink-600 underline">{t('product.sizeGuide')}</button>
               </div>
               <div className="flex flex-wrap gap-3">
-                {product.variants.map((v) => (
-                  <button key={v.id} onClick={() => setSelectedVariant(v.id)} disabled={v.stock_quantity === 0}
+                {sizeOptions.map((s, i) => (
+                  <button key={s.key ?? `one-size-${i}`} onClick={() => handleSelectSize(s.key)} disabled={!s.inStock}
                     className={`min-w-[3rem] px-4 py-2.5 rounded-full border text-sm font-medium transition-all ${
-                      selectedVariant === v.id ? 'border-ink-700 bg-ink-700 text-ivory-50'
-                      : v.stock_quantity === 0 ? 'border-stone-200 text-stone-300 cursor-not-allowed line-through'
+                      selectedSize === s.key ? 'border-ink-700 bg-ink-700 text-ivory-50'
+                      : !s.inStock  ? 'border-stone-200 text-stone-300 cursor-not-allowed line-through'
                       : 'border-stone-300 text-ink-700 hover:border-mink-300'
                     }`}>
-                    {v.size ?? t('product.oneSize')}
+                    {s.label}
                   </button>
                 ))}
               </div>

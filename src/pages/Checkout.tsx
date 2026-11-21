@@ -394,11 +394,12 @@ export default function Checkout() {
                 <div className="space-y-2">
                   {items.map((item) => {
                     const variant = 'variant' in item ? item.variant : undefined
+                    const variantLabel = [variant?.size?.trim(), variant?.color?.trim()].filter(Boolean).join(' · ')
                     return (
                       <div key={(item as { id?: string }).id ?? item.variant_id} className="flex justify-between text-sm">
                         <span className="text-ink-600">
                           {pick(variant?.product?.name, variant?.product?.name_bn) || t('common.product')} × {item.quantity}
-                          {variant?.size && ` (${variant.size})`}
+                          {variantLabel && ` (${variantLabel})`}
                         </span>
                         <span className="text-ink-700 font-medium">
                           {formatBDT((variant?.price ?? 0) * item.quantity)}

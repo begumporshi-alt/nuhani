@@ -233,7 +233,14 @@ export default function OrderConfirmation() {
                 <p className="text-ink-700 font-medium">{item.product_name}</p>
                 <p className="text-ink-400 text-xs">
                   {t('order.qty', { n: item.quantity })}
-                  {item.variant_details && (item.variant_details as Record<string, string>).size && ` · ${t('order.sizeLabel', { v: (item.variant_details as Record<string, string>).size })}`}
+                  {(() => {
+                    const vd = (item.variant_details ?? null) as Record<string, string> | null
+                    const parts = [
+                      vd?.size?.trim() ? t('order.sizeLabel', { v: vd.size.trim() }) : '',
+                      vd?.color?.trim() ? t('order.colorLabel', { v: vd.color.trim() }) : '',
+                    ].filter(Boolean)
+                    return parts.length > 0 ? ` · ${parts.join(' · ')}` : ''
+                  })()}
                 </p>
               </div>
               <span className="text-ink-700 font-medium">{formatBDT(item.total_price)}</span>
